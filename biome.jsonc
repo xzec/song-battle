@@ -28,7 +28,9 @@
         "useButtonType": "off"
       },
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "useImportType": "error",
+        "useNodejsImportProtocol": "error"
       },
       "correctness": {
         "noUnusedImports": "error",
