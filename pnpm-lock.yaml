@@ -10,7 +10,7 @@ overrides:
 
 patchedDependencies:
   eslint-plugin-react-hooks@0.0.0-experimental-df38ac9a-20250926:
-    hash: 36b4dc3d0596dbfe564b11acfbe693ba86727cb38435e40e32ea9b9162b68303
+    hash: 7d3c24fbc459216e34aaa322d34d5e9566284bd6704ee92ad763182edf10478b
     path: patches/eslint-plugin-react-hooks@0.0.0-experimental-df38ac9a-20250926.patch
 
 importers:
@@ -44,7 +44,7 @@ importers:
         version: 9.36.0
       eslint-plugin-react-hooks:
         specifier: 0.0.0-experimental-df38ac9a-20250926
-        version: 0.0.0-experimental-df38ac9a-20250926(patch_hash=36b4dc3d0596dbfe564b11acfbe693ba86727cb38435e40e32ea9b9162b68303)(eslint@9.36.0)
+        version: 0.0.0-experimental-df38ac9a-20250926(patch_hash=7d3c24fbc459216e34aaa322d34d5e9566284bd6704ee92ad763182edf10478b)(eslint@9.36.0)
       eslint-plugin-react-refresh:
         specifier: ^0.4.20
         version: 0.4.22(eslint@9.36.0)
@@ -1718,7 +1718,7 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-plugin-react-hooks@0.0.0-experimental-df38ac9a-20250926(patch_hash=36b4dc3d0596dbfe564b11acfbe693ba86727cb38435e40e32ea9b9162b68303)(eslint@9.36.0):
+  eslint-plugin-react-hooks@0.0.0-experimental-df38ac9a-20250926(patch_hash=7d3c24fbc459216e34aaa322d34d5e9566284bd6704ee92ad763182edf10478b)(eslint@9.36.0):
     dependencies:
       '@babel/core': 7.28.4
       '@babel/parser': 7.28.4
