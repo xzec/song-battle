@@ -13,8 +13,7 @@
 - Run `pnpm install <package_name>@latest` to install the latest version of a package. The only exceptions are experimental packages listed below
 - This project uses lots of experimental packages, don't try to replace them with stable versions or otherwise modify their version without permission. Namely, the following packages are:
     - Vite: `rolldown-vite`,
-    - TypeScript: `@typescript/native-preview` (`tsc` -> `tsgo`),
-    - React: `react@experimental`,    
+    - React: `react@experimental`,
     - React DOM: `react-dom@experimental`,
     - ESLint Plugin React Hooks: `eslint-plugin-react-hooks` (including the patched version).
 - Do not add a function return type in TypeScript, it can be inferred. This rule can have exceptions.
