@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "typecheck": "tsgo -b --noEmit",
+    "typecheck": "tsc -b --noEmit",
+    "format:check": "biome check .",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -28,13 +29,13 @@
     "eslint-plugin-react-hooks": "0.0.0-experimental-df38ac9a-20250926",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
-    "typescript": "npm:@typescript/native-preview@7.0.0-dev.20250929.1",
+    "lefthook": "^1.13.5",
+    "typescript": "5.9.2",
     "typescript-eslint": "^8.44.0",
     "vite": "npm:rolldown-vite@7.1.13"
   },
   "pnpm": {
     "overrides": {
-      "typescript": "npm:@typescript/native-preview@7.0.0-dev.20250929.1",
       "vite": "npm:rolldown-vite@7.1.13"
     },
     "patchedDependencies": {
