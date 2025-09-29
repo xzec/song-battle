@@ -2,10 +2,10 @@ pre-commit:
   parallel: true
   jobs:
     - name: ts check
-      run: tsc -b --noEmit
+      run: pnpm tsc -b --noEmit
 
     - name: lint
-      run: eslint .
+      run: pnpm eslint .
 
     - name: format check
-      run: tsc -b --noEmit
+      run: pnpm tsc -b --noEmit
