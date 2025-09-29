@@ -1,0 +1,78 @@
+diff --git a/cjs/eslint-plugin-react-hooks.d.ts b/cjs/eslint-plugin-react-hooks.d.ts
+index 5cf73c03c6f9d726ec5de58a82357f6c033994a5..6163466ce80cbfad7ddbaafaf6625130c1097b2e 100644
+--- a/cjs/eslint-plugin-react-hooks.d.ts
++++ b/cjs/eslint-plugin-react-hooks.d.ts
+@@ -1,11 +1,71 @@
+ import * as estree from 'estree';
+-import { Rule } from 'eslint';
++import { Rule, ESLint } from 'eslint';
+ 
+ declare const plugin: {
+     meta: {
+         name: string;
+     };
+-    configs: {};
++    configs: {
++      /** Legacy recommended config, to be used with rc-based configurations */
++      'recommended-legacy': {
++        plugins: string[];
++        rules: {
++          'react-hooks/rules-of-hooks': "error";
++          'react-hooks/exhaustive-deps': "warn";
++        };
++      };
++      /**
++       * 'recommended' is currently aliased to the legacy / rc recommended config) to maintain backwards compatibility.
++       * This is deprecated and in v6, it will switch to alias the flat recommended config.
++       */
++      recommended: {
++        plugins: string[];
++        rules: {
++          'react-hooks/rules-of-hooks': "error";
++          'react-hooks/exhaustive-deps': "warn";
++        };
++      };
++      /** Latest recommended config, to be used with flat configurations */
++      'recommended-latest': {
++        name: string;
++        plugins: {
++          readonly 'react-hooks': ESLint.Plugin;
++        };
++        rules: {
++          'react-hooks/rules-of-hooks': "error";
++          'react-hooks/exhaustive-deps': "warn";
++        };
++      'flat/recommended': {
++        plugins: string[];
++        rules: {};
++      },
++      // Object.assign(plugin.configs, {
++      //     'recommended-legacy': {
++      //         plugins: ['react-hooks'],
++      //         rules: ruleConfigs,
++      //     },
++      //     'flat/recommended': [
++      //         {
++      //             plugins: {
++      //                 'react-hooks': plugin,
++      //             },
++      //             rules: ruleConfigs,
++      //         },
++      //     ],
++      //     'recommended-latest': [
++      //         {
++      //             plugins: {
++      //                 'react-hooks': plugin,
++      //             },
++      //             rules: ruleConfigs,
++      //         },
++      //     ],
++      //     recommended: {
++      //         plugins: ['react-hooks'],
++      //         rules: ruleConfigs,
++      //     },
++      // });
++    };
+     rules: {
+         'exhaustive-deps': {
+             meta: {

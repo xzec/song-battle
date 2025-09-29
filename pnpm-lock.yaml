@@ -5,8 +5,13 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  vite: npm:rolldown-vite@7.1.12
   typescript: npm:@typescript/native-preview@7.0.0-dev.20250929.1
+  vite: npm:rolldown-vite@7.1.12
+
+patchedDependencies:
+  eslint-plugin-react-hooks@0.0.0-experimental-df38ac9a-20250926:
+    hash: 36b4dc3d0596dbfe564b11acfbe693ba86727cb38435e40e32ea9b9162b68303
+    path: patches/eslint-plugin-react-hooks@0.0.0-experimental-df38ac9a-20250926.patch
 
 importers:
 
@@ -39,7 +44,7 @@ importers:
         version: 9.36.0
       eslint-plugin-react-hooks:
         specifier: 0.0.0-experimental-df38ac9a-20250926
-        version: 0.0.0-experimental-df38ac9a-20250926(eslint@9.36.0)
+        version: 0.0.0-experimental-df38ac9a-20250926(patch_hash=36b4dc3d0596dbfe564b11acfbe693ba86727cb38435e40e32ea9b9162b68303)(eslint@9.36.0)
       eslint-plugin-react-refresh:
         specifier: ^0.4.20
         version: 0.4.22(eslint@9.36.0)
@@ -1713,7 +1718,7 @@ snapshots:
 
   escape-string-regexp@4.0.0: {}
 
-  eslint-plugin-react-hooks@0.0.0-experimental-df38ac9a-20250926(eslint@9.36.0):
+  eslint-plugin-react-hooks@0.0.0-experimental-df38ac9a-20250926(patch_hash=36b4dc3d0596dbfe564b11acfbe693ba86727cb38435e40e32ea9b9162b68303)(eslint@9.36.0):
     dependencies:
       '@babel/core': 7.28.4
       '@babel/parser': 7.28.4
