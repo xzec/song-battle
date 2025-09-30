@@ -8,6 +8,10 @@ export default defineConfig({
   server: {
     port: 3029,
     open: true,
+    host: '127.0.0.1',
+  },
+  preview: {
+    port: 3030,
   },
   plugins: [
     react({
