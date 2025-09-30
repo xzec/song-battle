@@ -7,10 +7,10 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "preview": "pnpm build && vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",
-    "format:check": "biome check .",
-    "preview": "vite preview"
+    "format:check": "biome check ."
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
