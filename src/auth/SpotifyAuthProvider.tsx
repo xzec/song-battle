@@ -19,11 +19,6 @@ import {
   tokensAreExpired,
 } from '~/auth/spotify'
 
-const useStableHistoryReplace = () =>
-  useCallback((target: string) => {
-    window.history.replaceState(null, '', target)
-  }, [])
-
 const { redirectUri } = getSpotifyConfig()
 const callbackPathname = new URL(redirectUri).pathname
 
@@ -36,13 +31,16 @@ export const SpotifyAuthProvider = ({
   const [tokens, setTokens] = useState<StoredSpotifyTokens | null>(null)
   const [user, setUser] = useState<SpotifyUserProfile | null>(null)
   const [error, setError] = useState<AuthError | null>(null)
-  const replaceHistory = useStableHistoryReplace()
+
+  const replaceHistory = useCallback((target: string) => {
+    window.history.replaceState(null, '', target)
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
     const signal = controller.signal
 
-    const applyTokens = async (nextTokens: StoredSpotifyTokens) => {
+    async function applyTokens(nextTokens: StoredSpotifyTokens) {
       setTokens(nextTokens)
       storeTokens(nextTokens)
 
@@ -63,23 +61,25 @@ export const SpotifyAuthProvider = ({
       if (!signal.aborted) setStatus('authenticated')
     }
 
-    const initialize = async () => {
+    async function initialize() {
       if (window.location.pathname === callbackPathname) {
         setStatus('authenticating')
         const searchParams = new URLSearchParams(location.search)
         try {
-          const { tokens: callbackTokens, redirectTo } =
-            await handleSpotifyCallback(searchParams, signal)
+          const { tokens: callbackTokens } = await handleSpotifyCallback(
+            searchParams,
+            signal,
+          )
           if (signal.aborted) return
           await applyTokens(callbackTokens)
           if (signal.aborted) return
-          replaceHistory(redirectTo || '/')
         } catch (authError) {
           if (signal.aborted) return
           setTokens(null)
           clearStoredTokens()
           setStatus('error')
           setError(authError as AuthError)
+        } finally {
           replaceHistory('/')
         }
         return
