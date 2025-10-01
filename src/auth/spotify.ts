@@ -6,8 +6,8 @@ import type {
   StoredSpotifyTokens,
 } from '~/auth/types'
 
-const clientId = 'e17f18f75a0b4a1da45193945c7c39c7'
-const redirectUri = 'http://127.0.0.1:3029/callback'
+const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
+const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI
 const scope = 'user-read-private user-read-email'
 const authUrl = 'https://accounts.spotify.com/authorize'
 const tokenUrl = 'https://accounts.spotify.com/api/token'
@@ -263,13 +263,5 @@ export async function handleSpotifyCallback(
   return {
     tokens: convertToStoredTokens(tokenResponse),
     redirectTo: session.redirectTo,
-  }
-}
-
-export function getSpotifyConfig() {
-  return {
-    clientId: clientId,
-    redirectUri: redirectUri,
-    scopes: scope,
   }
 }

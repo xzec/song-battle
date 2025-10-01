@@ -6,7 +6,6 @@ import {
   clearStoredTokens,
   convertToStoredTokens,
   fetchSpotifyProfile,
-  getSpotifyConfig,
   getStoredTokens,
   handleSpotifyCallback,
   refreshAccessToken,
@@ -19,8 +18,8 @@ import type {
   StoredSpotifyTokens,
 } from '~/auth/types'
 
-const { redirectUri } = getSpotifyConfig()
-const callbackPathname = new URL(redirectUri).pathname
+const callbackPathname = new URL(import.meta.env.VITE_SPOTIFY_REDIRECT_URI)
+  .pathname
 
 export const SpotifyAuthProvider = ({
   children,
@@ -66,12 +65,9 @@ export const SpotifyAuthProvider = ({
         setStatus('authenticating')
         const searchParams = new URLSearchParams(location.search)
         try {
-          const { tokens: callbackTokens } = await handleSpotifyCallback(
-            searchParams,
-            signal,
-          )
+          const { tokens } = await handleSpotifyCallback(searchParams, signal)
           if (signal.aborted) return
-          await applyTokens(callbackTokens)
+          await applyTokens(tokens)
           if (signal.aborted) return
         } catch (authError) {
           if (signal.aborted) return
