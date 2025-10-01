@@ -87,6 +87,17 @@ export function tokensAreExpired(tokens: StoredSpotifyTokens) {
   return tokens.expiresAt <= Date.now() + tokenExpiryBuffer
 }
 
+export function convertToStoredTokens(input: SpotifyTokenResponse) {
+  const expiresAt = Date.now() + input.expires_in * 1000
+  return {
+    accessToken: input.access_token,
+    tokenType: input.token_type,
+    expiresAt,
+    refreshToken: input.refresh_token,
+    scope: input.scope ?? scope,
+  } satisfies StoredSpotifyTokens
+}
+
 export async function beginSpotifyAuth() {
   const codeVerifier = generateRandomString(64)
   const state = generateRandomString(16)
@@ -182,17 +193,6 @@ export async function refreshAccessToken(
       cause: error,
     })
   }
-}
-
-export function convertToStoredTokens(input: SpotifyTokenResponse) {
-  const expiresAt = Date.now() + input.expires_in * 1000
-  return {
-    accessToken: input.access_token,
-    tokenType: input.token_type,
-    expiresAt,
-    refreshToken: input.refresh_token,
-    scope: input.scope ?? scope,
-  } satisfies StoredSpotifyTokens
 }
 
 export async function fetchSpotifyProfile(

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AuthError } from '~/auth/AuthError'
-import { SpotifyAuthContext } from '~/auth/SpotifyAuthContext.tsx'
+import { SpotifyAuthContext } from '~/auth/SpotifyAuthContext'
 import {
   beginSpotifyAuth,
   clearStoredTokens,
