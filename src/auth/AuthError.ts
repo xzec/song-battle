@@ -34,8 +34,8 @@ export class AuthError extends Error {
 
   private static defaultMessage = {
     network_error: 'Network error',
-    refresh_failed: 'Failed to refresh Spotify token',
-    callback_error: 'Spotify callback error',
-    token_exchange_failed: 'Missing authorization code in Spotify callback',
+    refresh_failed: 'Failed to refresh token',
+    callback_error: 'callback error',
+    token_exchange_failed: 'Missing authorization code in callback',
   } as const satisfies Record<AuthErrorType, string>
 }
