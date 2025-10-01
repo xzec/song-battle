@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { SpotifyAuthContext } from '~/auth/SpotifyAuthContext.tsx'
 import {
-  type AuthStatus,
-  SpotifyAuthContext,
-} from '~/auth/SpotifyAuthContext.tsx'
-import {
-  type AuthError,
   beginSpotifyAuth,
   clearStoredTokens,
   convertToStoredTokens,
@@ -13,11 +9,15 @@ import {
   getStoredTokens,
   handleSpotifyCallback,
   refreshAccessToken,
-  type SpotifyUserProfile,
-  type StoredSpotifyTokens,
   storeTokens,
   tokensAreExpired,
 } from '~/auth/spotify'
+import type {
+  AuthError,
+  AuthStatus,
+  SpotifyUserProfile,
+  StoredSpotifyTokens,
+} from '~/auth/types'
 
 const { redirectUri } = getSpotifyConfig()
 const callbackPathname = new URL(redirectUri).pathname
@@ -118,11 +118,11 @@ export const SpotifyAuthProvider = ({
           await applyTokens(normalized)
         } catch (refreshError) {
           if (signal.aborted) return
-          clearStoredTokens()
+          setStatus('unauthenticated')
           setTokens(null)
           setUser(null)
-          setStatus('unauthenticated')
           setError(refreshError as AuthError)
+          clearStoredTokens()
         }
         return
       }
@@ -135,9 +135,10 @@ export const SpotifyAuthProvider = ({
 
     return () => {
       controller.abort()
-      setStatus('loading')
+      clearStoredTokens()
       setTokens(null)
       setUser(null)
+      setStatus('loading')
       setError(null)
     }
   }, [replaceHistory])

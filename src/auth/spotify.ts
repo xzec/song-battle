@@ -1,7 +1,15 @@
+import type {
+  AuthError,
+  PkceSession,
+  SpotifyTokenResponse,
+  SpotifyUserProfile,
+  StoredSpotifyTokens,
+} from '~/auth/types'
+
 const clientId = 'e17f18f75a0b4a1da45193945c7c39c7'
 const redirectUri = 'http://127.0.0.1:3029/callback'
 const scope = 'user-read-private user-read-email'
-const authUrl = new URL('https://accounts.spotify.com/authorize')
+const authUrl = 'https://accounts.spotify.com/authorize'
 const tokenUrl = 'https://accounts.spotify.com/api/token'
 
 const pkceStorageKey = 'spotify:pkce:state'
@@ -28,15 +36,13 @@ function base64encode(input: ArrayBuffer) {
     .replace(/\//g, '_')
 }
 
-function generateState() {
-  return generateRandomString(16)
-}
-
-type PkceSession = {
-  verifier: string
-  state: string
-  createdAt: number
-  redirectTo: string
+function formEncode(input: Record<string, string | number | undefined | null>) {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(input)) {
+    if (value === undefined || value === null) continue
+    params.append(key, String(value))
+  }
+  return params
 }
 
 function loadPkceSession() {
@@ -56,47 +62,6 @@ function storePkceSession(session: PkceSession) {
 
 function clearPkceSession() {
   sessionStorage.removeItem(pkceStorageKey)
-}
-
-export type SpotifyTokenResponse = {
-  access_token: string
-  token_type: string
-  expires_in: number
-  refresh_token?: string
-  scope?: string
-}
-
-export type StoredSpotifyTokens = {
-  accessToken: string
-  tokenType: string
-  expiresAt: number
-  refreshToken?: string
-  scope: string
-}
-
-export type SpotifyImage = {
-  url: string
-  height: number | null
-  width: number | null
-}
-
-export type SpotifyUserProfile = {
-  id: string
-  display_name: string | null
-  email?: string
-  images?: SpotifyImage[]
-}
-
-export type AuthError = {
-  type:
-    | 'callback_error'
-    | 'state_mismatch'
-    | 'missing_verifier'
-    | 'token_exchange_failed'
-    | 'refresh_failed'
-    | 'network_error'
-  message: string
-  details?: unknown
 }
 
 export function getStoredTokens() {
@@ -122,28 +87,9 @@ export function tokensAreExpired(tokens: StoredSpotifyTokens) {
   return tokens.expiresAt <= Date.now() + tokenExpiryBuffer
 }
 
-// const buildAuthorizeUrl = ({
-//   state,
-//   challenge,
-// }: {
-//   state: string
-//   challenge: string
-// }) => {
-//   const params = new URLSearchParams({
-//     client_id: spotifyClientId,
-//     response_type: 'code',
-//     redirect_uri: spotifyRedirectUri,
-//     scope: spotifyScopes.join(' '),
-//     state,
-//     code_challenge_method: 'S256',
-//     code_challenge: challenge,
-//   })
-//   return `https://accounts.spotify.com/authorize?${params.toString()}`
-// }
-
 export async function beginSpotifyAuth() {
   const codeVerifier = generateRandomString(64)
-  const state = generateState()
+  const state = generateRandomString(16)
   const hashed = await sha256(codeVerifier)
   const codeChallenge = base64encode(hashed)
 
@@ -163,17 +109,10 @@ export async function beginSpotifyAuth() {
     createdAt: Date.now(),
     redirectTo: redirectUri,
   })
-  authUrl.search = new URLSearchParams(params).toString()
-  location.href = authUrl.toString()
-}
 
-function formEncode(input: Record<string, string | number | undefined | null>) {
-  const params = new URLSearchParams()
-  Object.entries(input).forEach(([key, value]) => {
-    if (value === undefined || value === null) return
-    params.append(key, String(value))
-  })
-  return params
+  const url = new URL(authUrl)
+  url.search = new URLSearchParams(params).toString()
+  location.href = url.toString()
 }
 
 export async function exchangeCodeForTokens(
@@ -335,7 +274,7 @@ export async function handleSpotifyCallback(
     session.verifier,
     signal,
   )
-  // clearPkceSession()
+  clearPkceSession()
 
   return {
     tokens: convertToStoredTokens(tokenResponse),

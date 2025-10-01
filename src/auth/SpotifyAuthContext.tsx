@@ -1,16 +1,10 @@
 import { createContext, useContext } from 'react'
 import type {
   AuthError,
+  AuthStatus,
   SpotifyUserProfile,
   StoredSpotifyTokens,
-} from '~/auth/spotify.ts'
-
-export type AuthStatus =
-  | 'loading'
-  | 'unauthenticated'
-  | 'authenticating'
-  | 'authenticated'
-  | 'error'
+} from '~/auth/types'
 
 export type SpotifyAuthValue = {
   status: AuthStatus
