@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AuthError } from '~/auth/AuthError'
 import { SpotifyAuthContext } from '~/auth/SpotifyAuthContext.tsx'
 import {
   beginSpotifyAuth,
@@ -13,7 +14,6 @@ import {
   tokensAreExpired,
 } from '~/auth/spotify'
 import type {
-  AuthError,
   AuthStatus,
   SpotifyUserProfile,
   StoredSpotifyTokens,
@@ -56,7 +56,7 @@ export const SpotifyAuthProvider = ({
         if (signal.aborted) return
         setUser(null)
         setStatus('error')
-        setError(profileError as AuthError)
+        setError(AuthError.from(profileError))
       }
       if (!signal.aborted) setStatus('authenticated')
     }
@@ -78,7 +78,7 @@ export const SpotifyAuthProvider = ({
           setTokens(null)
           clearStoredTokens()
           setStatus('error')
-          setError(authError as AuthError)
+          setError(AuthError.from(authError))
         } finally {
           replaceHistory('/')
         }
@@ -121,7 +121,7 @@ export const SpotifyAuthProvider = ({
           setStatus('unauthenticated')
           setTokens(null)
           setUser(null)
-          setError(refreshError as AuthError)
+          setError(AuthError.from(refreshError, 'refresh_failed'))
           clearStoredTokens()
         }
         return
@@ -134,7 +134,7 @@ export const SpotifyAuthProvider = ({
     void initialize()
 
     return () => {
-      controller.abort()
+      controller.abort('Component unmount')
       clearStoredTokens()
       setTokens(null)
       setUser(null)
@@ -149,7 +149,7 @@ export const SpotifyAuthProvider = ({
     setUser(null)
     void beginSpotifyAuth().catch((authError) => {
       setStatus('error')
-      setError(authError as AuthError)
+      setError(AuthError.from(authError))
     })
   }, [])
 

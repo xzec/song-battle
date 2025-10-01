@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react'
 import type {
-  AuthError,
   AuthStatus,
   SpotifyUserProfile,
   StoredSpotifyTokens,
 } from '~/auth/types'
+import type { AuthError } from './AuthError'
 
 export type SpotifyAuthValue = {
   status: AuthStatus

@@ -1,5 +1,5 @@
+import { AuthError } from '~/auth/AuthError'
 import type {
-  AuthError,
   PkceSession,
   SpotifyTokenResponse,
   SpotifyUserProfile,
@@ -137,22 +137,17 @@ export async function exchangeCodeForTokens(
     })
 
     if (!response.ok) {
-      const details = await response.text()
-      throw {
-        type: 'token_exchange_failed',
-        message: 'Spotify token exchange failed',
-        details,
-      } satisfies AuthError
+      const cause = await response.text()
+      throw new AuthError('token_exchange_failed', { cause })
     }
 
     return (await response.json()) as SpotifyTokenResponse
   } catch (error) {
-    if ((error as AuthError)?.type) throw error
-    throw {
-      type: 'network_error',
-      message: 'Network error while exchanging Spotify code',
-      details: error,
-    } satisfies AuthError
+    if (error instanceof AuthError) throw error
+    throw new AuthError('network_error', {
+      message: 'Network error while exchanging Spotify code for token',
+      cause: error,
+    })
   }
 }
 
@@ -175,22 +170,17 @@ export async function refreshAccessToken(
     })
 
     if (!response.ok) {
-      const details = await response.text()
-      throw {
-        type: 'refresh_failed',
-        message: 'Spotify refresh token exchange failed',
-        details,
-      } satisfies AuthError
+      const cause = await response.text()
+      throw new AuthError('refresh_failed', { cause })
     }
 
     return (await response.json()) as SpotifyTokenResponse
   } catch (error) {
-    if ((error as AuthError)?.type) throw error
-    throw {
-      type: 'network_error',
+    if (error instanceof AuthError) throw error
+    throw new AuthError('network_error', {
       message: 'Network error while refreshing Spotify token',
-      details: error,
-    } satisfies AuthError
+      cause: error,
+    })
   }
 }
 
@@ -217,12 +207,11 @@ export async function fetchSpotifyProfile(
   })
 
   if (!response.ok) {
-    const details = await response.text()
-    throw {
-      type: 'network_error',
+    const cause = await response.text()
+    throw new AuthError('network_error', {
       message: 'Failed to fetch Spotify profile',
-      details,
-    } satisfies AuthError
+      cause,
+    })
   }
 
   return (await response.json()) as SpotifyUserProfile
@@ -235,38 +224,33 @@ export async function handleSpotifyCallback(
   const errorParam = searchParams.get('error')
   if (errorParam) {
     clearPkceSession()
-
-    throw {
-      type: 'callback_error',
-      message: `Spotify authorization error: ${errorParam}`,
-    } satisfies AuthError
+    throw new AuthError('callback_error', { cause: errorParam })
   }
 
   const code = searchParams.get('code')
   const returnedState = searchParams.get('state')
   const session = loadPkceSession()
 
-  if (!session) {
-    throw {
-      type: 'missing_verifier',
+  if (!session)
+    throw new AuthError('token_exchange_failed', {
       message: 'Missing PKCE verifier for Spotify authentication',
-    } satisfies AuthError
-  }
+      cause: 'session not found',
+    })
 
   if (!code) {
     clearPkceSession()
-    throw {
-      type: 'token_exchange_failed',
+    throw new AuthError('token_exchange_failed', {
       message: 'Missing authorization code in Spotify callback',
-    } satisfies AuthError
+      cause: 'authorization code not found',
+    })
   }
 
   if (session.state !== returnedState) {
     clearPkceSession()
-    throw {
-      type: 'state_mismatch',
-      message: 'Spotify state mismatch detected',
-    } satisfies AuthError
+    throw new AuthError('token_exchange_failed', {
+      message: 'State mismatch detected during Spotify authentication',
+      cause: 'state changed',
+    })
   }
 
   const tokenResponse = await exchangeCodeForTokens(

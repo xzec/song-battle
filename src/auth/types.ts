@@ -27,17 +27,11 @@ export type SpotifyUserProfile = {
   images?: SpotifyImage[]
 }
 
-export type AuthError = {
-  type:
-    | 'callback_error'
-    | 'state_mismatch'
-    | 'missing_verifier'
-    | 'token_exchange_failed'
-    | 'refresh_failed'
-    | 'network_error'
-  message: string
-  details?: unknown
-}
+export type AuthErrorType =
+  | 'callback_error'
+  | 'token_exchange_failed'
+  | 'refresh_failed'
+  | 'network_error'
 
 export type PkceSession = {
   verifier: string
