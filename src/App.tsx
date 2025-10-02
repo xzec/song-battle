@@ -1,6 +1,6 @@
 import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 import { AuthenticatedScreen } from '~/components/AuthenticatedScreen'
-import { AuthScreen } from '~/components/AuthScreenProps'
+import { AuthScreen } from '~/components/AuthScreen'
 import { LoadingScreen } from '~/components/LoadingScreen'
 
 const App = () => {
