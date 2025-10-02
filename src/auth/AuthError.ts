@@ -34,8 +34,8 @@ export class AuthError extends Error {
 
   private static defaultMessage = {
     network_error: 'Network error',
-    refresh_failed: 'Failed to refresh token',
-    callback_error: 'callback error',
-    token_exchange_failed: 'Missing authorization code in callback',
+    callback_error: 'Callback error',
+    refresh_failed: 'Token refresh failed',
+    token_exchange_failed: 'Token exchange failed',
   } as const satisfies Record<AuthErrorType, string>
 }
