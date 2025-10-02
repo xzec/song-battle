@@ -36,7 +36,7 @@ function base64encode(input: ArrayBuffer) {
     .replace(/\//g, '_')
 }
 
-function formEncode(input: Record<string, string | number | undefined | null>) {
+function formEncode(input: Record<string, unknown>) {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(input)) {
     if (value === undefined || value === null) continue
@@ -114,11 +114,12 @@ export async function beginSpotifyAuth() {
     redirect_uri: redirectUri,
   }
 
+  sessionStorage.setItem('BEFORE', codeVerifier)
   storePkceSession({
-    verifier: codeVerifier,
+    codeVerifier,
     state,
+    redirectUri,
     createdAt: Date.now(),
-    redirectTo: redirectUri,
   })
 
   const url = new URL(authUrl)
@@ -128,8 +129,7 @@ export async function beginSpotifyAuth() {
 
 export async function exchangeCodeForTokens(
   code: string,
-  verifier: string,
-  signal?: AbortSignal,
+  codeVerifier: string,
 ) {
   try {
     const response = await fetch(tokenUrl, {
@@ -142,9 +142,8 @@ export async function exchangeCodeForTokens(
         code,
         redirect_uri: redirectUri,
         client_id: clientId,
-        code_verifier: verifier,
+        code_verifier: codeVerifier,
       }),
-      signal,
     })
 
     if (!response.ok) {
@@ -162,10 +161,7 @@ export async function exchangeCodeForTokens(
   }
 }
 
-export async function refreshAccessToken(
-  refreshToken: string,
-  signal?: AbortSignal,
-) {
+export async function refreshAccessToken(refreshToken: string) {
   try {
     const response = await fetch(tokenUrl, {
       method: 'POST',
@@ -177,7 +173,6 @@ export async function refreshAccessToken(
         refresh_token: refreshToken,
         client_id: clientId,
       }),
-      signal,
     })
 
     if (!response.ok) {
@@ -195,15 +190,11 @@ export async function refreshAccessToken(
   }
 }
 
-export async function fetchSpotifyProfile(
-  accessToken: string,
-  signal?: AbortSignal,
-) {
+export async function fetchSpotifyProfile(accessToken: string) {
   const response = await fetch('https://api.spotify.com/v1/me', {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    signal,
   })
 
   if (!response.ok) {
@@ -217,10 +208,7 @@ export async function fetchSpotifyProfile(
   return (await response.json()) as SpotifyUserProfile
 }
 
-export async function handleSpotifyCallback(
-  searchParams: URLSearchParams,
-  signal?: AbortSignal,
-) {
+export async function handleSpotifyCallback(searchParams: URLSearchParams) {
   const errorParam = searchParams.get('error')
   if (errorParam) {
     clearPkceSession()
@@ -233,7 +221,7 @@ export async function handleSpotifyCallback(
 
   if (!session)
     throw new AuthError('token_exchange_failed', {
-      message: 'Missing PKCE verifier for Spotify authentication',
+      message: 'Missing PKCE code verifier for Spotify authentication',
       cause: 'session not found',
     })
 
@@ -253,15 +241,10 @@ export async function handleSpotifyCallback(
     })
   }
 
-  const tokenResponse = await exchangeCodeForTokens(
-    code,
-    session.verifier,
-    signal,
-  )
+  const tokenResponse = await exchangeCodeForTokens(code, session.codeVerifier)
   clearPkceSession()
 
   return {
     tokens: convertToStoredTokens(tokenResponse),
-    redirectTo: session.redirectTo,
   }
 }

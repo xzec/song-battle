@@ -34,10 +34,10 @@ export type AuthErrorType =
   | 'network_error'
 
 export type PkceSession = {
-  verifier: string
+  codeVerifier: string
   state: string
+  redirectUri: string
   createdAt: number
-  redirectTo: string
 }
 
 export type AuthStatus =

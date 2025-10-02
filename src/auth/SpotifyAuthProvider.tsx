@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AuthError } from '~/auth/AuthError'
 import { SpotifyAuthContext } from '~/auth/SpotifyAuthContext'
 import {
@@ -30,34 +30,27 @@ export const SpotifyAuthProvider = ({
   const [tokens, setTokens] = useState<StoredSpotifyTokens | null>(null)
   const [user, setUser] = useState<SpotifyUserProfile | null>(null)
   const [error, setError] = useState<AuthError | null>(null)
-
-  const replaceHistory = useCallback((target: string) => {
-    window.history.replaceState(null, '', target)
-  }, [])
+  const mountedRef = useRef(false)
 
   useEffect(() => {
-    const controller = new AbortController()
-    const signal = controller.signal
+    if (mountedRef.current) return
+    mountedRef.current = true
 
     async function applyTokens(nextTokens: StoredSpotifyTokens) {
       setTokens(nextTokens)
       storeTokens(nextTokens)
 
       try {
-        const profile = await fetchSpotifyProfile(
-          nextTokens.accessToken,
-          signal,
-        )
-        if (signal.aborted) return
+        const profile = await fetchSpotifyProfile(nextTokens.accessToken)
         setUser(profile)
         setError(null)
       } catch (profileError) {
-        if (signal.aborted) return
+        console.error(profileError)
         setUser(null)
         setStatus('error')
         setError(AuthError.from(profileError))
       }
-      if (!signal.aborted) setStatus('authenticated')
+      setStatus('authenticated')
     }
 
     async function initialize() {
@@ -65,18 +58,16 @@ export const SpotifyAuthProvider = ({
         setStatus('authenticating')
         const searchParams = new URLSearchParams(location.search)
         try {
-          const { tokens } = await handleSpotifyCallback(searchParams, signal)
-          if (signal.aborted) return
+          const { tokens } = await handleSpotifyCallback(searchParams)
           await applyTokens(tokens)
-          if (signal.aborted) return
         } catch (authError) {
-          if (signal.aborted) return
+          console.error(authError)
           setTokens(null)
           clearStoredTokens()
           setStatus('error')
           setError(AuthError.from(authError))
         } finally {
-          replaceHistory('/')
+          history.replaceState(null, '', '/')
         }
         return
       }
@@ -102,23 +93,19 @@ export const SpotifyAuthProvider = ({
 
         setStatus('authenticating')
         try {
-          const refreshed = await refreshAccessToken(
-            stored.refreshToken,
-            signal,
-          )
-          if (signal.aborted) return
+          const refreshed = await refreshAccessToken(stored.refreshToken)
           const normalized = convertToStoredTokens({
             ...refreshed,
             refresh_token: refreshed.refresh_token ?? stored.refreshToken,
           })
           await applyTokens(normalized)
         } catch (refreshError) {
-          if (signal.aborted) return
+          console.error(refreshError)
+          clearStoredTokens()
           setStatus('unauthenticated')
           setTokens(null)
           setUser(null)
           setError(AuthError.from(refreshError, 'refresh_failed'))
-          clearStoredTokens()
         }
         return
       }
@@ -128,21 +115,13 @@ export const SpotifyAuthProvider = ({
     }
 
     void initialize()
-
-    return () => {
-      controller.abort('Component unmount')
-      clearStoredTokens()
-      setTokens(null)
-      setUser(null)
-      setStatus('loading')
-      setError(null)
-    }
-  }, [replaceHistory])
+  }, [])
 
   const login = useCallback(() => {
     setStatus('authenticating')
     setError(null)
     setUser(null)
+
     void beginSpotifyAuth().catch((authError) => {
       setStatus('error')
       setError(AuthError.from(authError))
