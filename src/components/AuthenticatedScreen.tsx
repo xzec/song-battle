@@ -6,7 +6,7 @@ export const AuthenticatedScreen = ({
   userName,
   onLogout,
 }: AuthenticatedScreenProps) => (
-  <div className="min-h-screen bg-gradient-to-br from-emerald-500/20 via-slate-900 to-slate-950 text-white">
+  <div className="min-h-screen">
     <header className="flex items-center justify-between px-8 py-6">
       <div>
         <p className="text-sm text-white/50 uppercase tracking-[0.3em]">
