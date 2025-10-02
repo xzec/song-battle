@@ -1,11 +1,11 @@
 pre-commit:
   parallel: true
   jobs:
-    - name: ts check
-      run: pnpm tsc -b --noEmit
+    - name: tsc
+      run: pnpm tsc -p tsconfig.app.json
 
-    - name: lint
+    - name: eslint
       run: pnpm eslint .
 
-    - name: format check
-      run: pnpm tsc -b --noEmit
+    - name: biome
+      run: pnpm biome check .
