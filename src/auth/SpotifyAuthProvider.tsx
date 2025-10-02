@@ -32,6 +32,23 @@ export const SpotifyAuthProvider = ({
   const [error, setError] = useState<AuthError | null>(null)
   const mountedRef = useRef(false)
 
+  const handleError = useCallback((error: AuthError) => {
+    console.error(error)
+    setStatus('error')
+    setError(error)
+    setUser(null)
+    clearStoredTokens()
+    setTokens(null)
+  }, [])
+
+  const handleUnauthenticated = useCallback(() => {
+    setStatus('unauthenticated')
+    setUser(null)
+    setError(null)
+    clearStoredTokens()
+    setTokens(null)
+  }, [])
+
   useEffect(() => {
     if (mountedRef.current) return
     mountedRef.current = true
@@ -45,27 +62,21 @@ export const SpotifyAuthProvider = ({
         setUser(profile)
         setError(null)
       } catch (profileError) {
-        console.error(profileError)
-        setUser(null)
-        setStatus('error')
-        setError(AuthError.from(profileError))
+        handleError(AuthError.from(profileError))
+        return
       }
       setStatus('authenticated')
     }
 
     async function initialize() {
-      if (window.location.pathname === callbackPathname) {
+      if (location.pathname === callbackPathname) {
         setStatus('authenticating')
         const searchParams = new URLSearchParams(location.search)
         try {
           const { tokens } = await handleSpotifyCallback(searchParams)
           await applyTokens(tokens)
         } catch (authError) {
-          console.error(authError)
-          setTokens(null)
-          clearStoredTokens()
-          setStatus('error')
-          setError(AuthError.from(authError))
+          handleError(AuthError.from(authError))
         } finally {
           history.replaceState(null, '', '/')
         }
@@ -74,39 +85,29 @@ export const SpotifyAuthProvider = ({
 
       const stored = getStoredTokens()
       if (!stored) {
-        setStatus('unauthenticated')
-        setTokens(null)
-        setUser(null)
-        setError(null)
+        handleUnauthenticated()
         return
       }
 
       if (tokensAreExpired(stored)) {
         if (!stored.refreshToken) {
-          clearStoredTokens()
-          setTokens(null)
-          setUser(null)
-          setStatus('unauthenticated')
-          setError(null)
+          handleUnauthenticated()
           return
         }
 
         setStatus('authenticating')
+        let tokens: StoredSpotifyTokens
         try {
           const refreshed = await refreshAccessToken(stored.refreshToken)
-          const normalized = convertToStoredTokens({
+          tokens = convertToStoredTokens({
             ...refreshed,
             refresh_token: refreshed.refresh_token ?? stored.refreshToken,
           })
-          await applyTokens(normalized)
         } catch (refreshError) {
-          console.error(refreshError)
-          clearStoredTokens()
-          setStatus('unauthenticated')
-          setTokens(null)
-          setUser(null)
-          setError(AuthError.from(refreshError, 'refresh_failed'))
+          handleError(AuthError.from(refreshError, 'refresh_failed'))
+          return
         }
+        await applyTokens(tokens)
         return
       }
 
@@ -115,12 +116,12 @@ export const SpotifyAuthProvider = ({
     }
 
     void initialize()
-  }, [])
+  }, [handleError, handleUnauthenticated])
 
   const login = useCallback(() => {
     setStatus('authenticating')
-    setError(null)
     setUser(null)
+    setError(null)
 
     void beginSpotifyAuth().catch((authError) => {
       setStatus('error')
@@ -128,13 +129,7 @@ export const SpotifyAuthProvider = ({
     })
   }, [])
 
-  const logout = useCallback(() => {
-    clearStoredTokens()
-    setTokens(null)
-    setUser(null)
-    setStatus('unauthenticated')
-    setError(null)
-  }, [])
+  const logout = handleUnauthenticated
 
   const value = useMemo(
     () => ({

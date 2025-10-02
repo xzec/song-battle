@@ -87,7 +87,9 @@ export function tokensAreExpired(tokens: StoredSpotifyTokens) {
   return tokens.expiresAt <= Date.now() + tokenExpiryBuffer
 }
 
-export function convertToStoredTokens(input: SpotifyTokenResponse) {
+export function convertToStoredTokens(
+  input: SpotifyTokenResponse,
+): StoredSpotifyTokens {
   const expiresAt = Date.now() + input.expires_in * 1000
   return {
     accessToken: input.access_token,
@@ -95,7 +97,7 @@ export function convertToStoredTokens(input: SpotifyTokenResponse) {
     expiresAt,
     refreshToken: input.refresh_token,
     scope: input.scope ?? scope,
-  } satisfies StoredSpotifyTokens
+  }
 }
 
 export async function beginSpotifyAuth() {
