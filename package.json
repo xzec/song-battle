@@ -13,6 +13,7 @@
     "format:check": "biome check ."
   },
   "dependencies": {
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@tailwindcss/vite": "^4.1.13",
     "react": "0.0.0-experimental-df38ac9a-20250926",
     "react-dom": "0.0.0-experimental-df38ac9a-20250926",
