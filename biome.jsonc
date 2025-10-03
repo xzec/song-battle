@@ -36,11 +36,19 @@
         "useNodejsImportProtocol": "error"
       },
       "correctness": {
-        "noUnusedImports": "error",
+        "noUnusedImports": {
+          "level": "error",
+          "fix": "safe",
+          "options": {}
+        },
         "noUnusedFunctionParameters": "error"
       },
       "nursery": {
-        "useSortedClasses": "error"
+        "useSortedClasses": {
+          "fix": "safe",
+          "level": "error",
+          "options": {}
+        }
       }
     }
   },
