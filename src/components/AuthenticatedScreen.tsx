@@ -16,7 +16,6 @@ export const AuthenticatedScreen = () => {
   const [activeMenu, setActiveMenu] = useState<'search' | 'avatar' | null>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const avatarRef = useRef<HTMLButtonElement>(null)
   const { logout } = useSpotifyAuth()
   const user = useUser()
   const avatarInitial = user.display_name?.trim().charAt(0) ?? '?'
@@ -97,7 +96,6 @@ export const AuthenticatedScreen = () => {
                   </span>
                 )}
                 <button
-                  ref={avatarRef}
                   type="button"
                   className={cn(
                     'flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border bg-white/10 font-medium text-sm text-white/80 ring-emerald-500 transition hover:text-white focus-visible:ring-0',
@@ -136,7 +134,7 @@ export const AuthenticatedScreen = () => {
                 onOpenAutoFocus={(event) => event.preventDefault()}
                 onCloseAutoFocus={(event) => event.preventDefault()}
                 className={cn(
-                  'minimal-scrollbar animate-slide-fade rounded-2xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg',
+                  'scrollbar-none animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg',
                   {
                     'max-h-80 w-[calc(100vw-16px)] max-w-4xl overflow-y-auto':
                       activeMenu === 'search',
