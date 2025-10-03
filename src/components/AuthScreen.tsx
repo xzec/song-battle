@@ -7,7 +7,7 @@ type AuthScreenProps = {
 
 export const AuthScreen = ({ onLogin, errorMessage }: AuthScreenProps) => (
   <div className="flex min-h-screen items-center justify-center px-6 py-16">
-    <div className="w-full max-w-md rounded-3xl border border-white/10 bg-slate-950/60 p-10 shadow-2xl backdrop-blur-xl">
+    <div className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-950/60 p-10 shadow-2xl backdrop-blur-xl">
       <span className="inline-flex items-center gap-2 text-sm text-white/60 uppercase tracking-[0.3em]">
         <span className="h-1 w-1 rounded-full bg-emerald-400" />
         Song Battle

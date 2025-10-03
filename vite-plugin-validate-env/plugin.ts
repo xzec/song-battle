@@ -12,7 +12,6 @@ const validateEnvPlugin = (envSchema: ZodType = schema): PluginOption => [
       const result = envSchema.safeParse(env)
       if (!result.success) {
         const lines = result.error.issues.map((issue) => {
-          console.log(issue.input)
           return ` - ${issue.path}: ${issue.message}`
         })
         const error = [

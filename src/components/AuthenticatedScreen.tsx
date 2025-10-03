@@ -51,10 +51,12 @@ export const AuthenticatedScreen = ({
               <div
                 ref={searchBarRef}
                 className={cn(
-                  'focus-within:emerald-ring flex flex-1 cursor-pointer items-center gap-3 rounded-full border border-white/10 bg-white/5 py-1 pr-1 pl-4 text-white ring-emerald-500 backdrop-blur-xl focus-within:border-transparent focus-within:bg-white/15 hover:not-focus-within:not-active:border-white/40 active:border-transparent',
-                  'inset-shadow-sm inset-shadow-zinc-900/20 shadow-md shadow-zinc-900/15',
+                  'focus-within:emerald-ring flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white transition duration-200',
+                  'border border-white/10 focus-within:border-transparent hover:not-focus-within:not-active:border-white/40',
+                  'bg-zinc-900/40 focus-within:bg-zinc-900',
+                  'inset-shadow-sm inset-shadow-zinc-900/40 shadow-md shadow-zinc-900/25',
                   {
-                    'emerald-ring border-transparent bg-white/15': menuOpen,
+                    'emerald-ring border-transparent bg-zinc-900': menuOpen,
                   },
                 )}
                 onClick={() => {
@@ -131,7 +133,7 @@ export const AuthenticatedScreen = ({
                 onOpenAutoFocus={(event) => event.preventDefault()}
                 onCloseAutoFocus={(event) => event.preventDefault()}
                 className={cn(
-                  'relative rounded-2xl border border-white/10 bg-slate-950/80 p-3 text-white shadow-lg backdrop-blur-xl',
+                  'relative rounded-2xl border border-white/10 bg-zinc-950/80 p-3 text-white shadow-lg backdrop-blur-xl',
                   'animate-slide-fade',
                   {
                     'max-h-80 w-[min(32rem,_calc(100vw-3rem))] overflow-y-auto':
