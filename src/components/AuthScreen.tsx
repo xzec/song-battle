@@ -1,44 +1,44 @@
 import type { SVGProps } from 'react'
+import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 
-type AuthScreenProps = {
-  onLogin: () => void
-  errorMessage?: string
-}
+export const AuthScreen = () => {
+  const { error, login } = useSpotifyAuth()
 
-export const AuthScreen = ({ onLogin, errorMessage }: AuthScreenProps) => (
-  <div className="flex min-h-screen items-center justify-center px-6 py-16">
-    <div className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-950/60 p-10 shadow-2xl backdrop-blur-xl">
-      <span className="inline-flex items-center gap-2 text-sm text-white/60 uppercase tracking-[0.3em]">
-        <span className="h-1 w-1 rounded-full bg-emerald-400" />
-        Song Battle
-      </span>
-      <h1 className="mt-5 font-semibold text-3xl text-white leading-tight md:text-4xl">
-        Sign in with Spotify to start the tournament
-      </h1>
-      <p className="mt-3 text-white/70">
-        We use your Spotify account to pull in the tracks and playlists you
-        love. No passwords are stored, everything stays on your device.
-      </p>
-      {errorMessage && (
-        <div className="mt-6 rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-rose-200 text-sm">
-          {errorMessage}
-        </div>
-      )}
-      <button
-        onClick={onLogin}
-        className="mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-emerald-500 px-6 py-3 font-medium text-base text-black transition hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
-      >
-        <SpotifyIcon className="h-5 w-5" />
-        Continue with Spotify
-      </button>
-      <p className="mt-6 text-white/40 text-xs">
-        By continuing you agree to let Song Battle access your Spotify profile
-        &amp; playlists to build the bracket. You can revoke access anytime from
-        your Spotify account.
-      </p>
+  return (
+    <div className="flex min-h-screen items-center justify-center px-6 py-16">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-950/60 p-10 shadow-2xl backdrop-blur-xl">
+        <span className="inline-flex items-center gap-2 text-sm text-white/60 uppercase tracking-[0.3em]">
+          <span className="h-1 w-1 rounded-full bg-emerald-500" />
+          Song Battle
+        </span>
+        <h1 className="mt-5 font-semibold text-3xl text-white leading-tight md:text-4xl">
+          Sign in with Spotify to start the tournament
+        </h1>
+        <p className="mt-3 text-white/70">
+          We use your Spotify account to pull in the tracks and playlists you
+          love. No passwords are stored, everything stays on your device.
+        </p>
+        {error?.message && (
+          <div className="mt-6 rounded-lg border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-rose-200 text-sm">
+            {error.message}
+          </div>
+        )}
+        <button
+          onClick={login}
+          className="mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-emerald-500 px-6 py-3 font-medium text-base text-black transition hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+        >
+          <SpotifyIcon className="h-5 w-5" />
+          Continue with Spotify
+        </button>
+        <p className="mt-6 text-white/40 text-xs">
+          By continuing you agree to let Song Battle access your Spotify profile
+          &amp; playlists to build the bracket. You can revoke access anytime
+          from your Spotify account.
+        </p>
+      </div>
     </div>
-  </div>
-)
+  )
+}
 
 const SpotifyIcon = ({
   className = 'h-6 w-6',

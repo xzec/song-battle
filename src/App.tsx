@@ -6,21 +6,16 @@ import { Layout } from '~/components/Layout'
 import { LoadingScreen } from '~/components/LoadingScreen'
 
 const App = () => {
-  const { status, error, login, logout, user } = useSpotifyAuth()
+  const { status } = useSpotifyAuth()
 
   let content: ReactNode
 
   if (status === 'loading' || status === 'authenticating') {
     content = <LoadingScreen />
   } else if (status === 'unauthenticated' || status === 'error') {
-    content = <AuthScreen onLogin={login} errorMessage={error?.message} />
+    content = <AuthScreen />
   } else {
-    content = (
-      <AuthenticatedScreen
-        userName={user?.display_name ?? 'Anonymous battler'}
-        onLogout={logout}
-      />
-    )
+    content = <AuthenticatedScreen />
   }
 
   return <Layout>{content}</Layout>
