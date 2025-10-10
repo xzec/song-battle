@@ -22,6 +22,12 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.13
         version: 4.1.13(rolldown-vite@7.1.14(@types/node@24.6.0)(jiti@2.6.0))
+      '@tanstack/pacer':
+        specifier: ^0.15.4
+        version: 0.15.4
+      '@tanstack/react-query':
+        specifier: ^5.90.2
+        version: 5.90.2(react@0.0.0-experimental-df38ac9a-20250926)
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -31,6 +37,9 @@ importers:
       react-dom:
         specifier: 0.0.0-experimental-df38ac9a-20250926
         version: 0.0.0-experimental-df38ac9a-20250926(react@0.0.0-experimental-df38ac9a-20250926)
+      react-hotkeys-hook:
+        specifier: ^5.1.0
+        version: 5.1.0(react-dom@0.0.0-experimental-df38ac9a-20250926(react@0.0.0-experimental-df38ac9a-20250926))(react@0.0.0-experimental-df38ac9a-20250926)
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.3.1
@@ -788,6 +797,25 @@ packages:
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
 
+  '@tanstack/devtools-event-client@0.3.2':
+    resolution: {integrity: sha512-gkvph/YMCFUfAca75EsJBJnhbKitDGix7vdEcT/3lAV+eyGSv+uECYG43apVQN4yLJKnV6mzcNvGzOhDhb72gg==}
+    engines: {node: '>=18'}
+
+  '@tanstack/pacer@0.15.4':
+    resolution: {integrity: sha512-vGY+CWsFZeac3dELgB6UZ4c7OacwsLb8hvL2gLS6hTgy8Fl0Bm/aLokHaeDIP+q9F9HUZTnp360z9uv78eg8pg==}
+    engines: {node: '>=18'}
+
+  '@tanstack/query-core@5.90.2':
+    resolution: {integrity: sha512-k/TcR3YalnzibscALLwxeiLUub6jN5EDLwKDiO7q5f4ICEoptJ+n9+7vcEFy5/x/i6Q+Lb/tXrsKCggf5uQJXQ==}
+
+  '@tanstack/react-query@5.90.2':
+    resolution: {integrity: sha512-CLABiR+h5PYfOWr/z+vWFt5VsOA2ekQeRQBFSKlcoW6Ndx/f8rfyVmq4LbgOM4GG2qtxAxjLYLOpCNTYm4uKzw==}
+    peerDependencies:
+      react: ^18 || ^19
+
+  '@tanstack/store@0.7.7':
+    resolution: {integrity: sha512-xa6pTan1bcaqYDS9BDpSiS63qa6EoDkPN9RsRaxHuDdVDNntzq3xNwR5YKTU/V3SkSyC9T4YVOPh2zRQN0nhIQ==}
+
   '@tybys/wasm-util@0.10.1':
     resolution: {integrity: sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg==}
 
@@ -1516,6 +1544,12 @@ packages:
     resolution: {integrity: sha512-Uiq3/vVraVWRnaWddhjbViNZU/yvl4TGh1sjjRU2J3aQd1KlGHpNRwwMCXLE9vllb45UJDQyDb2fNIbwrspO2g==}
     peerDependencies:
       react: 0.0.0-experimental-df38ac9a-20250926
+
+  react-hotkeys-hook@5.1.0:
+    resolution: {integrity: sha512-GCNGXjBzV9buOS3REoQFmSmE4WTvBhYQ0YrAeeMZI83bhXg3dRWsLHXDutcVDdEjwJqJCxk5iewWYX5LtFUd7g==}
+    peerDependencies:
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
 
   react-refresh@0.17.0:
     resolution: {integrity: sha512-z6F7K9bV85EfseRCp2bzrpyQ0Gkw1uLoCel9XBVWPg/TjRj94SkJzUTGfOa4bs7iJvBWtQG0Wq7wnI0syw3EBQ==}
@@ -2402,6 +2436,22 @@ snapshots:
       tailwindcss: 4.1.13
       vite: rolldown-vite@7.1.14(@types/node@24.6.0)(jiti@2.6.0)
 
+  '@tanstack/devtools-event-client@0.3.2': {}
+
+  '@tanstack/pacer@0.15.4':
+    dependencies:
+      '@tanstack/devtools-event-client': 0.3.2
+      '@tanstack/store': 0.7.7
+
+  '@tanstack/query-core@5.90.2': {}
+
+  '@tanstack/react-query@5.90.2(react@0.0.0-experimental-df38ac9a-20250926)':
+    dependencies:
+      '@tanstack/query-core': 5.90.2
+      react: 0.0.0-experimental-df38ac9a-20250926
+
+  '@tanstack/store@0.7.7': {}
+
   '@tybys/wasm-util@0.10.1':
     dependencies:
       tslib: 2.8.1
@@ -3092,6 +3142,11 @@ snapshots:
     dependencies:
       react: 0.0.0-experimental-df38ac9a-20250926
       scheduler: 0.0.0-experimental-df38ac9a-20250926
+
+  react-hotkeys-hook@5.1.0(react-dom@0.0.0-experimental-df38ac9a-20250926(react@0.0.0-experimental-df38ac9a-20250926))(react@0.0.0-experimental-df38ac9a-20250926):
+    dependencies:
+      react: 0.0.0-experimental-df38ac9a-20250926
+      react-dom: 0.0.0-experimental-df38ac9a-20250926(react@0.0.0-experimental-df38ac9a-20250926)
 
   react-refresh@0.17.0: {}
 

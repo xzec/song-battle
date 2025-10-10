@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
-import { AuthenticatedScreen } from '~/components/AuthenticatedScreen'
 import { AuthScreen } from '~/components/AuthScreen'
+import { Battle } from '~/components/Battle'
 import { Layout } from '~/components/Layout'
 import { LoadingScreen } from '~/components/LoadingScreen'
 
@@ -15,7 +15,7 @@ const App = () => {
   } else if (status === 'unauthenticated' || status === 'error') {
     content = <AuthScreen />
   } else {
-    content = <AuthenticatedScreen />
+    content = <Battle />
   }
 
   return <Layout>{content}</Layout>

@@ -25,9 +25,7 @@ export const useSpotifyAuth = () => {
 }
 
 export const useUser = () => {
-  const context = useContext(SpotifyAuthContext)
-  if (!context)
-    throw new Error('useUser must be used within SpotifyAuthProvider')
+  const context = useSpotifyAuth()
   if (!context.user)
     console.error('useUser must be used within authenticated screens.')
 
