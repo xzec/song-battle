@@ -31,7 +31,18 @@ type SpotifyTrackSearchResponse = {
   }
 }
 
-const hitSearch = async (query: string, accessToken: string) => {
+type SpotifyTrackSearchError = {
+  error: {
+    status: number
+    message: string
+  }
+}
+
+const hitSearch = async (
+  query: string,
+  accessToken: string,
+  refreshTokens: () => Promise<void>,
+) => {
   const params = new URLSearchParams({
     q: query,
     type: 'track',
@@ -46,6 +57,13 @@ const hitSearch = async (query: string, accessToken: string) => {
       Authorization: `Bearer ${accessToken}`,
     },
   })
+
+  if (!res.ok) {
+    const parsed = (await res.json()) as SpotifyTrackSearchError
+    console.error(parsed)
+    if (parsed.error.status === 401) void refreshTokens()
+  }
+
   const data = await res.json()
   return data as SpotifyTrackSearchResponse
 }
@@ -55,6 +73,7 @@ type SearchProps = {
 }
 
 export const Search = ({ ref }: SearchProps) => {
+  const { logout, tokens, refreshTokens } = useSpotifyAuth()
   const { setActiveBracketId } = useBattle()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -62,14 +81,13 @@ export const Search = ({ ref }: SearchProps) => {
   const [activeMenu, setActiveMenu] = useState<'search' | 'avatar' | null>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
   const disposeRef = useRef<HTMLDivElement>(null)
-  const { logout, tokens } = useSpotifyAuth()
   const user = useUser()
   const avatarInitial = user.display_name?.trim().charAt(0) ?? '?'
   const avatarUrl = user.images?.[0]?.url
 
   const { data } = useQuery({
     queryKey: ['search', query],
-    queryFn: () => hitSearch(query, tokens!.accessToken),
+    queryFn: () => hitSearch(query, tokens!.accessToken, refreshTokens),
     enabled: Boolean(tokens?.accessToken && query.length),
   })
 
@@ -98,7 +116,7 @@ export const Search = ({ ref }: SearchProps) => {
         <div
           ref={searchBarRef}
           className={cn(
-            'focus-within:emerald-ring flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white transition',
+            'focus-within:emerald-ring pointer-events-auto flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white backdrop-blur-2xl transition',
             'border border-white/10 focus-within:border-transparent hover:not-focus-within:not-active:border-white/30',
             'bg-zinc-900/40 focus-within:bg-zinc-950/80',
             'inset-shadow-sm inset-shadow-zinc-900/40 shadow-md shadow-zinc-900/25',
@@ -183,9 +201,9 @@ export const Search = ({ ref }: SearchProps) => {
           onOpenAutoFocus={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => event.preventDefault()}
           className={cn(
-            'scrollbar-none relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg backdrop-blur-xl',
+            'scrollbar-none pointer-events-auto relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg backdrop-blur-xl',
             {
-              'max-h-80 w-[calc(100vw-16px)] max-w-4xl overflow-y-auto':
+              'max-h-80 w-[calc(100vw-16px)] max-w-xl overflow-y-auto':
                 activeMenu === 'search',
               'w-44': activeMenu === 'avatar',
               hidden: activeMenu === 'search' && !data,

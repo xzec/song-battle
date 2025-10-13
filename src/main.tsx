@@ -4,7 +4,13 @@ import { createRoot } from 'react-dom/client'
 import App from '~/App'
 import { SpotifyAuthProvider } from '~/auth/SpotifyAuthProvider'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

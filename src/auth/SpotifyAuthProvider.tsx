@@ -49,11 +49,8 @@ export const SpotifyAuthProvider = ({
     setTokens(null)
   }, [])
 
-  useEffect(() => {
-    if (mountedRef.current) return
-    mountedRef.current = true
-
-    async function applyTokens(nextTokens: StoredSpotifyTokens) {
+  const applyTokens = useCallback(
+    async (nextTokens: StoredSpotifyTokens) => {
       setTokens(nextTokens)
       storeTokens(nextTokens)
 
@@ -66,7 +63,24 @@ export const SpotifyAuthProvider = ({
         return
       }
       setStatus('authenticated')
+    },
+    [handleError],
+  )
+
+  const refreshTokens = useCallback(async () => {
+    const tokens = getStoredTokens()
+    if (!tokens?.refreshToken) return
+
+    if (tokensAreExpired(tokens)) {
+      const newTokens = await refreshAccessToken(tokens.refreshToken)
+      const stored = convertToStoredTokens(newTokens)
+      void applyTokens(stored)
     }
+  }, [applyTokens])
+
+  useEffect(() => {
+    if (mountedRef.current) return
+    mountedRef.current = true
 
     async function initialize() {
       if (location.pathname === callbackPathname) {
@@ -116,7 +130,7 @@ export const SpotifyAuthProvider = ({
     }
 
     void initialize()
-  }, [handleError, handleUnauthenticated])
+  }, [handleError, handleUnauthenticated, applyTokens])
 
   const login = useCallback(() => {
     setStatus('authenticating')
@@ -136,11 +150,12 @@ export const SpotifyAuthProvider = ({
       status,
       user,
       tokens,
+      refreshTokens,
       error,
       login,
       logout,
     }),
-    [status, user, tokens, error, login, logout],
+    [status, user, tokens, refreshTokens, error, login, logout],
   )
 
   return <SpotifyAuthContext value={value}>{children}</SpotifyAuthContext>

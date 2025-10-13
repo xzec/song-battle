@@ -21,8 +21,34 @@ const defaultBrackets: Bracket[] = [
   { id: 'bracket-16', track: null },
 ] as const
 
+const defaultQuarters: Bracket[] = [
+  { id: 'quarter-1', track: null },
+  { id: 'quarter-2', track: null },
+  { id: 'quarter-3', track: null },
+  { id: 'quarter-4', track: null },
+  { id: 'quarter-5', track: null },
+  { id: 'quarter-6', track: null },
+  { id: 'quarter-7', track: null },
+  { id: 'quarter-8', track: null },
+] as const
+
+const defaultSemi: Bracket[] = [
+  { id: 'quarter-1', track: null },
+  { id: 'quarter-2', track: null },
+  { id: 'quarter-3', track: null },
+  { id: 'quarter-4', track: null },
+] as const
+
+const defaultFinal: Bracket[] = [
+  { id: 'final-1', track: null },
+  { id: 'final-2', track: null },
+] as const
+
 export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
   const [brackets, setBrackets] = useState(defaultBrackets)
+  const [quarters, setQuarters] = useState(defaultQuarters)
+  const [semi, setSemi] = useState(defaultSemi)
+  const [final, setFinal] = useState(defaultFinal)
   const [activeBracketId, setActiveBracketId] = useState<string | null>(null)
 
   const addTrackToBracket = (bracketId: string, track: Track) => {
@@ -55,12 +81,25 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
     () => ({
       brackets,
       setBrackets,
+      quarters,
+      setQuarters,
+      semi,
+      setSemi,
+      final,
+      setFinal,
       addTrackToBracket,
       addTrackToFirstAvailableBracket,
       activeBracketId,
       setActiveBracketId,
     }),
-    [brackets, activeBracketId, addTrackToFirstAvailableBracket],
+    [
+      brackets,
+      quarters,
+      semi,
+      final,
+      activeBracketId,
+      addTrackToFirstAvailableBracket,
+    ],
   )
 
   return <BattleContext value={value}>{children}</BattleContext>

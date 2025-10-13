@@ -33,7 +33,7 @@ export const SearchItem = ({
           )
         }
       }}
-      className="flex w-full items-center gap-3 rounded-xl p-2 text-left text-sm transition hover:bg-white/10 hover:text-white"
+      className="flex w-full cursor-pointer items-center gap-3 rounded-xl p-2 text-left text-sm transition hover:bg-white/10 hover:text-white"
     >
       <img
         ref={imgRef}

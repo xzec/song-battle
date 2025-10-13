@@ -22,7 +22,7 @@ export const Bracket = ({
   return (
     <div
       className={cn(
-        'flex h-24 w-80 items-center overflow-hidden rounded-xl border-2 border-zinc-500 border-dashed bg-zinc-300/20 text-sm shadow-lg transition',
+        'flex h-20 w-72 items-center overflow-hidden rounded-xl border-2 border-zinc-500 border-dashed bg-zinc-300/20 text-sm shadow-lg transition',
         {
           'border-blue-500 bg-zinc-300/30': activeBracketId === bracketId,
           'border-green-500': isOver,

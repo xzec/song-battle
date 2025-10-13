@@ -14,6 +14,12 @@ export type Bracket = {
 export type BattleContextValue = {
   brackets: Bracket[]
   setBrackets: Dispatch<React.SetStateAction<Bracket[]>>
+  quarters: Bracket[]
+  setQuarters: Dispatch<React.SetStateAction<Bracket[]>>
+  semi: Bracket[]
+  setSemi: Dispatch<React.SetStateAction<Bracket[]>>
+  final: Bracket[]
+  setFinal: Dispatch<React.SetStateAction<Bracket[]>>
   addTrackToBracket: (bracketId: string, track: Track) => void
   addTrackToFirstAvailableBracket: (track: Track) => void
   activeBracketId: string | null
