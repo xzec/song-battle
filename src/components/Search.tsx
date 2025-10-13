@@ -2,6 +2,7 @@ import { Icon } from '@iconify-icon/react'
 import * as Popover from '@radix-ui/react-popover'
 import { useQuery } from '@tanstack/react-query'
 import {
+  type RefObject,
   startTransition,
   useRef,
   useState,
@@ -9,11 +10,14 @@ import {
 } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { useSpotifyAuth, useUser } from '~/auth/SpotifyAuthContext'
+import { SearchItem } from '~/components/SearchItem'
+import { useBattle } from '~/context/BattleContext'
 import { cn } from '~/utils/cn'
 
 type SpotifyTrackSearchResponse = {
   tracks: {
     items: Array<{
+      id: string
       name: string
       artists: Array<{
         name: string
@@ -42,18 +46,21 @@ const hitSearch = async (query: string, accessToken: string) => {
       Authorization: `Bearer ${accessToken}`,
     },
   })
-  console.log(res)
   const data = await res.json()
   return data as SpotifyTrackSearchResponse
 }
 
-export const Search = () => {
+type SearchProps = {
+  ref: RefObject<HTMLInputElement | null>
+}
+
+export const Search = ({ ref }: SearchProps) => {
+  const { setActiveBracketId } = useBattle()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [shadowOpen, setShadowOpen] = useState(false)
   const [activeMenu, setActiveMenu] = useState<'search' | 'avatar' | null>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
   const disposeRef = useRef<HTMLDivElement>(null)
   const { logout, tokens } = useSpotifyAuth()
   const user = useUser()
@@ -66,7 +73,7 @@ export const Search = () => {
     enabled: Boolean(tokens?.accessToken && query.length),
   })
 
-  useHotkeys('meta+k', () => inputRef?.current?.focus())
+  useHotkeys('meta+k', () => ref?.current?.focus())
   useHotkeys('esc', () => disposeRef?.current?.focus(), {
     enableOnFormTags: true,
   })
@@ -82,6 +89,7 @@ export const Search = () => {
   const closeMenu = () => {
     setShadowOpen(false)
     setOpen(false)
+    setActiveBracketId(null)
   }
 
   return (
@@ -100,7 +108,7 @@ export const Search = () => {
           )}
           onClick={() => {
             openMenu('search')
-            inputRef.current?.focus()
+            ref.current?.focus()
           }}
         >
           <Icon
@@ -110,7 +118,7 @@ export const Search = () => {
             className="text-white/50"
           />
           <input
-            ref={inputRef}
+            ref={ref}
             placeholder="Search Spotify"
             value={query}
             onFocus={() => openMenu('search')}
@@ -175,37 +183,28 @@ export const Search = () => {
           onOpenAutoFocus={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => event.preventDefault()}
           className={cn(
-            'scrollbar-none animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg',
+            'scrollbar-none relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg backdrop-blur-xl',
             {
               'max-h-80 w-[calc(100vw-16px)] max-w-4xl overflow-y-auto':
                 activeMenu === 'search',
               'w-44': activeMenu === 'avatar',
+              hidden: activeMenu === 'search' && !data,
             },
           )}
         >
           {activeMenu === 'search' ? (
-            <div className="text-sm text-white/80">
-              {data?.tracks.items.map((track, i) => (
-                <div
-                  key={i}
-                  className="flex w-full items-center gap-3 rounded-xl p-2 text-left transition hover:bg-white/10 hover:text-white"
-                >
-                  <img
-                    src={track.album.images.at(-1)?.url}
-                    width={40}
-                    height={40}
-                    className="rounded-md"
-                    alt=""
-                  />
-                  <div className="flex flex-col justify-center">
-                    <span className="font-medium">{track.name}</span>
-                    <span className="text-white/40">
-                      {track.artists.map((v) => v.name).join(', ')}
-                    </span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            data?.tracks.items.map((track) => (
+              <SearchItem
+                key={track.id}
+                onPick={closeMenu}
+                imagePreview={track.album.images.at(-1)?.url}
+                track={{
+                  image: track.album.images.at(-2)?.url,
+                  name: track.name,
+                  artist: track.artists.map((v) => v.name).join(', '),
+                }}
+              />
+            ))
           ) : (
             <button
               onClick={logout}
