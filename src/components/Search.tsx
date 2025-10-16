@@ -2,7 +2,6 @@ import { Icon } from '@iconify-icon/react'
 import * as Popover from '@radix-ui/react-popover'
 import { useQuery } from '@tanstack/react-query'
 import {
-  type RefObject,
   startTransition,
   useRef,
   useState,
@@ -68,13 +67,9 @@ const hitSearch = async (
   return data as SpotifyTrackSearchResponse
 }
 
-type SearchProps = {
-  ref: RefObject<HTMLInputElement | null>
-}
-
-export const Search = ({ ref }: SearchProps) => {
+export const Search = () => {
   const { logout, tokens, refreshTokens } = useSpotifyAuth()
-  const { setActiveBracketId } = useBattle()
+  const { setActiveBracketId, searchRef } = useBattle()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
   const [shadowOpen, setShadowOpen] = useState(false)
@@ -91,7 +86,7 @@ export const Search = ({ ref }: SearchProps) => {
     enabled: Boolean(tokens?.accessToken && query.length),
   })
 
-  useHotkeys('meta+k', () => ref?.current?.focus())
+  useHotkeys('meta+k', () => searchRef?.current?.focus())
   useHotkeys('esc', () => disposeRef?.current?.focus(), {
     enableOnFormTags: true,
   })
@@ -126,7 +121,7 @@ export const Search = ({ ref }: SearchProps) => {
           )}
           onClick={() => {
             openMenu('search')
-            ref.current?.focus()
+            searchRef.current?.focus()
           }}
         >
           <Icon
@@ -136,7 +131,7 @@ export const Search = ({ ref }: SearchProps) => {
             className="text-white/50"
           />
           <input
-            ref={ref}
+            ref={searchRef}
             placeholder="Search Spotify"
             value={query}
             onFocus={() => openMenu('search')}

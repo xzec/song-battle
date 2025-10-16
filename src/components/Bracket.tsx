@@ -1,37 +1,47 @@
 import { Icon } from '@iconify-icon/react'
-import { type RefObject, useState } from 'react'
+import { useState } from 'react'
 import { useBattle } from '~/context/BattleContext'
-import type { Track } from '~/context/types'
+import type { Bracket as BracketType, Track } from '~/context/types'
 import { cn } from '~/utils/cn'
 
 interface BracketProps extends React.HTMLAttributes<HTMLDivElement> {
+  interactive?: boolean
   bracketId: string
   track: Track | null
-  searchRef: RefObject<HTMLInputElement | null>
+  prevA?: BracketType | null | undefined
+  prevB?: BracketType | null | undefined
 }
 
 export const Bracket = ({
+  interactive = false,
   bracketId,
   track,
-  searchRef,
+  className,
+  prevA,
+  prevB,
   ...props
 }: BracketProps) => {
+  const { searchRef } = useBattle()
   const [isOver, setIsOver] = useState(false)
   const { addTrackToBracket, activeBracketId, setActiveBracketId } = useBattle()
+
+  const canBattle = Boolean(prevA?.track && prevB?.track)
+  console.log(canBattle, bracketId, prevA, prevB)
 
   return (
     <div
       className={cn(
-        'flex h-20 w-72 items-center overflow-hidden rounded-xl border-2 border-zinc-500 border-dashed bg-zinc-300/20 text-sm shadow-lg transition',
+        'flex h-20 w-72 items-center overflow-hidden rounded-xl border-2 border-zinc-500 border-dashed bg-zinc-700/20 text-sm shadow-lg transition',
         {
-          'border-blue-500 bg-zinc-300/30': activeBracketId === bracketId,
+          'border-blue-500 bg-zinc-400/30': bracketId === activeBracketId,
           'border-green-500': isOver,
-          'border border-zinc-700 border-solid bg-zinc-900': track,
-          'cursor-pointer justify-center': !track,
+          'border border-zinc-700 border-solid bg-zinc-950': track,
+          'cursor-pointer justify-center': !track && interactive,
+          className,
         },
       )}
       onClick={() => {
-        if (track) return
+        if (track || !interactive) return
         setActiveBracketId(bracketId)
         searchRef.current?.focus()
       }}
@@ -52,7 +62,11 @@ export const Bracket = ({
       {track ? (
         <>
           {track?.image ? (
-            <img src={track.image} alt="" className="h-full" />
+            <img
+              src={track.image}
+              alt=""
+              className="pointer-events-none h-full select-none"
+            />
           ) : (
             <div className="size-12">No image</div>
           )}
@@ -61,12 +75,14 @@ export const Bracket = ({
             <span className="text-white/50">{track?.artist}</span>
           </div>
         </>
-      ) : (
+      ) : interactive ? (
         <div className="flex items-center gap-1 text-white/50">
           <span>Add track</span>
           <Icon icon="icon-park-outline:add-one" />
         </div>
-      )}
+      ) : canBattle ? (
+        'do it'
+      ) : null}
     </div>
   )
 }

@@ -8,6 +8,8 @@ export type Track = {
 
 export type Bracket = {
   id: string
+  prev: [string, string] | null
+  next: string | null
   track: Track | null
 }
 
@@ -24,4 +26,6 @@ export type BattleContextValue = {
   addTrackToFirstAvailableBracket: (track: Track) => void
   activeBracketId: string | null
   setActiveBracketId: Dispatch<React.SetStateAction<string | null>>
+  searchRef: React.RefObject<HTMLInputElement | null>
+  getBracketById: (bracketId: string | null | undefined) => Bracket | null
 }
