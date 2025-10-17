@@ -197,8 +197,9 @@ export const Search = () => {
             ) : (
               <>
                 <span className="my-1 ml-2 block text-sm text-white/30">
-                  Previous
+                  Recent
                 </span>
+                <div className="mx-2 mb-2 h-[0.5px] bg-white/10" />
                 {storedSongs?.map((track, i) => (
                   <SearchItem
                     key={i}

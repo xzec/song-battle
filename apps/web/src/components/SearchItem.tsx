@@ -17,7 +17,8 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
   const removable = typeof onRemove === 'function'
 
   return (
-    <div
+    <button
+      tabIndex={0}
       draggable
       onClick={() => {
         addTrackToFirstAvailableBracket(track)
@@ -33,7 +34,7 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
           )
         }
       }}
-      className="flex w-full cursor-pointer items-center gap-3 rounded-xl p-2 text-left text-sm transition hover:bg-white/10 hover:text-white"
+      className="focus-visible:emerald-ring flex w-full cursor-pointer items-center gap-3 rounded-xl p-2 text-left text-sm transition hover:bg-white/10 focus-visible:bg-white/10"
     >
       <img
         ref={imgRef}
@@ -52,7 +53,7 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
         <button
           type="button"
           className={cn(
-            'flex size-6 items-center justify-center overflow-hidden rounded-full font-medium text-sm text-white/80 ring-emerald-500 transition hover:text-white focus-visible:ring-0',
+            'focus-visible:emerald-ring flex size-6 items-center justify-center overflow-hidden rounded-full font-medium text-sm text-white/50 ring-emerald-500 transition hover:text-white',
           )}
           aria-label="Remove from history"
           onClick={(e) => {
@@ -63,6 +64,6 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
           <Icon icon="ic:baseline-clear" inline />
         </button>
       )}
-    </div>
+    </button>
   )
 }
