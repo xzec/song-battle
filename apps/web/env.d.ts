@@ -1,4 +1,4 @@
-type ImportMetaEnvAugmented = import('./schema').EnvSchema
+type ImportMetaEnvAugmented = import('./env-schema').EnvSchema
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface ImportMetaEnv extends ImportMetaEnvAugmented {}

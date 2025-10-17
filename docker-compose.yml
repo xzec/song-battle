@@ -1,0 +1,14 @@
+name: song-battle
+services:
+  redis:
+    image: redis:latest
+    container_name: redis-song-battle
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/var/lib/redis/data
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'PING' | redis-cli | grep PONG"]
+volumes:
+  redis_data:
+    driver: local

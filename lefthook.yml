@@ -2,10 +2,10 @@ pre-commit:
   parallel: true
   jobs:
     - name: tsc
-      run: pnpm tsc -p tsconfig.app.json
+      run: pnpm --filter @repo/web typecheck
 
     - name: eslint
-      run: pnpm eslint .
+      run: pnpm --filter @repo/web lint
 
     - name: biome
-      run: pnpm biome check .
+      run: pnpm --filter @repo/web format:check

@@ -1,15 +1,14 @@
 import { loadEnv, type PluginOption } from 'vite'
 import type { ZodType } from 'zod'
-import { schema } from './schema'
 
 const name = 'vite-plugin-validate-env'
 
-const validateEnvPlugin = (envSchema: ZodType = schema): PluginOption => [
+const validateEnvPlugin = (schema: ZodType): PluginOption => [
   {
     name,
     config(_, { mode }) {
       const env = loadEnv(mode, process.cwd())
-      const result = envSchema.safeParse(env)
+      const result = schema.safeParse(env)
       if (!result.success) {
         const lines = result.error.issues.map((issue) => {
           return ` - ${issue.path}: ${issue.message}`

@@ -1,0 +1,9 @@
+{
+  "extends": "@repo/tsconfig/tsconfig.node.json",
+  "compilerOptions": {
+    "declaration": true,
+    "composite": true,
+    "declarationMap": true
+  },
+  "include": ["src"]
+}

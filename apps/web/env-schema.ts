@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const schema = z.object({
+export const envSchema = z.object({
   VITE_SPOTIFY_CLIENT_ID: z
     .string()
     .min(1)
@@ -12,4 +12,4 @@ export const schema = z.object({
     ),
 })
 
-export type EnvSchema = z.infer<typeof schema>
+export type EnvSchema = z.infer<typeof envSchema>

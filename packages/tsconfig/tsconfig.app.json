@@ -20,12 +20,6 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-
-    "baseUrl": ".",
-    "paths": {
-      "~/*": ["src/*"]
-    }
-  },
-  "include": ["src", "vite-plugin-validate-env/env.d.ts"]
+    "noUncheckedSideEffectImports": true
+  }
 }

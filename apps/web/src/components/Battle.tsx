@@ -1,7 +1,7 @@
 import { Bracket } from '~/components/Bracket'
 import { Search } from '~/components/Search'
 import { useBattle } from '~/context/BattleContext'
-import { toArrayPairs } from '~/utils/toArrayPairs'
+import { toArrayPairs } from '~/utils/to-array-pairs'
 
 export const Battle = () => {
   const { brackets, quarters, semi, final, getBracketById } = useBattle()
