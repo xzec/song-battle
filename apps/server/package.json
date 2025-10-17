@@ -8,7 +8,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.5",
-    "hono": "^4.10.0"
+    "hono": "^4.10.0",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@repo/tsconfig": "workspace:*",
