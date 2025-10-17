@@ -1,4 +1,7 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useMemo, useRef, useState } from 'react'
+import { storeSong } from '~/api'
+import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 import { BattleContext } from '~/context/BattleContext'
 import type { Bracket, Track } from '~/context/types'
 
@@ -121,20 +124,56 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
   const [final, setFinal] = useState(defaultFinal)
   const [activeBracketId, setActiveBracketId] = useState<string | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)
-
-  const addTrackToBracket = (bracketId: string, track: Track) => {
-    setBrackets((prev) => {
-      return prev.map((bracket) => {
-        if (bracket.id === bracketId) return { ...bracket, track }
-        return bracket
+  const { tokens } = useSpotifyAuth()
+  const queryClient = useQueryClient()
+  const storeSongMutation = useMutation({
+    mutationFn: async (track: Track) => {
+      if (tokens?.accessToken) await storeSong(track, tokens?.accessToken)
+    },
+    onMutate: async function optimisticUpdate(track: Track) {
+      await queryClient.cancelQueries({ queryKey: ['history'] })
+      const previousHistory = queryClient.getQueryData(['history'])
+      queryClient.setQueryData(['history'], (old: Track[]) => {
+        const existingTrack = old.find((t) => t.id === track.id)
+        if (existingTrack !== undefined) {
+          old.splice(old.indexOf(existingTrack), 1)
+          old.unshift(existingTrack)
+          return old
+        }
+        if (old.length === 5) old.pop()
+        return [track, ...old]
       })
-    })
-  }
+      return { previousHistory }
+    },
+    onError: (error, _newHistory, context) => {
+      console.error(error)
+      if (context?.previousHistory)
+        queryClient.setQueryData(['history'], context.previousHistory)
+    },
+  })
+
+  const addTrackToBracket = useCallback(
+    (bracketId: string, track: Track) => {
+      setBrackets((prev) => {
+        return prev.map((bracket) => {
+          if (bracket.id === bracketId) return { ...bracket, track }
+          return bracket
+        })
+      })
+      void storeSongMutation.mutate(track)
+    },
+    [storeSongMutation],
+  )
 
   const addTrackToFirstAvailableBracket = useCallback(
     (track: Track) => {
       if (activeBracketId) {
         addTrackToBracket(activeBracketId, track)
+        return
+      }
+
+      if (!brackets.some((bracket) => bracket.track === null)) {
+        console.error('No available brackets')
         return
       }
 
@@ -145,7 +184,7 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
     },
-    [activeBracketId, brackets],
+    [activeBracketId, addTrackToBracket, brackets],
   )
 
   const getBracketById = useCallback(
@@ -181,8 +220,9 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
       quarters,
       semi,
       final,
-      activeBracketId,
+      addTrackToBracket,
       addTrackToFirstAvailableBracket,
+      activeBracketId,
       getBracketById,
     ],
   )

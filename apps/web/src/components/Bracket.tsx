@@ -26,7 +26,6 @@ export const Bracket = ({
   const { addTrackToBracket, activeBracketId, setActiveBracketId } = useBattle()
 
   const canBattle = Boolean(prevA?.track && prevB?.track)
-  console.log(canBattle, bracketId, prevA, prevB)
 
   return (
     <div
@@ -34,8 +33,8 @@ export const Bracket = ({
         'flex h-20 w-72 items-center overflow-hidden rounded-xl border-2 border-zinc-500 border-dashed bg-zinc-700/20 text-sm shadow-lg transition',
         {
           'border-blue-500 bg-zinc-400/30': bracketId === activeBracketId,
-          'border-green-500': isOver,
           'border border-zinc-700 border-solid bg-zinc-950': track,
+          'border-green-500': isOver,
           'cursor-pointer justify-center': !track && interactive,
           className,
         },

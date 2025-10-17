@@ -1,6 +1,6 @@
 import { Icon } from '@iconify-icon/react'
 import * as Popover from '@radix-ui/react-popover'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   startTransition,
   useRef,
@@ -8,64 +8,12 @@ import {
   unstable_ViewTransition as ViewTransition,
 } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
+import { deleteStoredSong, getStoredSongs, hitSearch } from '~/api'
 import { useSpotifyAuth, useUser } from '~/auth/SpotifyAuthContext'
 import { SearchItem } from '~/components/SearchItem'
 import { useBattle } from '~/context/BattleContext'
+import type { Track } from '~/context/types'
 import { cn } from '~/utils/cn'
-
-type SpotifyTrackSearchResponse = {
-  tracks: {
-    items: Array<{
-      id: string
-      name: string
-      artists: Array<{
-        name: string
-      }>
-      album: {
-        images: Array<{
-          url: string
-        }>
-      }
-    }>
-  }
-}
-
-type SpotifyTrackSearchError = {
-  error: {
-    status: number
-    message: string
-  }
-}
-
-const hitSearch = async (
-  query: string,
-  accessToken: string,
-  refreshTokens: () => Promise<void>,
-) => {
-  const params = new URLSearchParams({
-    q: query,
-    type: 'track',
-    market: 'US',
-    limit: '10',
-  })
-
-  const url = `https://api.spotify.com/v1/search?${params.toString()}`
-
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  })
-
-  if (!res.ok) {
-    const parsed = (await res.json()) as SpotifyTrackSearchError
-    console.error(parsed)
-    if (parsed.error.status === 401) void refreshTokens()
-  }
-
-  const data = await res.json()
-  return data as SpotifyTrackSearchResponse
-}
 
 export const Search = () => {
   const { logout, tokens, refreshTokens } = useSpotifyAuth()
@@ -77,6 +25,7 @@ export const Search = () => {
   const searchBarRef = useRef<HTMLDivElement>(null)
   const disposeRef = useRef<HTMLDivElement>(null)
   const user = useUser()
+  const queryClient = useQueryClient()
   const avatarInitial = user.display_name?.trim().charAt(0) ?? '?'
   const avatarUrl = user.images?.[0]?.url
 
@@ -84,6 +33,32 @@ export const Search = () => {
     queryKey: ['search', query],
     queryFn: () => hitSearch(query, tokens!.accessToken, refreshTokens),
     enabled: Boolean(tokens?.accessToken && query.length),
+  })
+
+  const { data: storedSongs, refetch: refetchStoredSongs } = useQuery({
+    queryKey: ['history'],
+    queryFn: () => getStoredSongs(tokens!.accessToken),
+    enabled: Boolean(tokens?.accessToken && !query.length),
+  })
+
+  const mutation = useMutation({
+    mutationFn: async (trackId: string) => {
+      await deleteStoredSong(trackId, tokens!.accessToken)
+    },
+    onMutate: async function optimisticUpdate(trackId: string) {
+      await queryClient.cancelQueries({ queryKey: ['history'] })
+      const previousHistory = queryClient.getQueryData(['history'])
+      queryClient.setQueryData(['history'], (old: Track[]) =>
+        old.filter((track) => track.id !== trackId),
+      )
+      return { previousHistory }
+    },
+    onError: (error, _newHistory, context) => {
+      console.error(error)
+      if (context?.previousHistory)
+        queryClient.setQueryData(['history'], context.previousHistory)
+    },
+    onSuccess: () => void refetchStoredSongs(),
   })
 
   useHotkeys('meta+k', () => searchRef?.current?.focus())
@@ -201,23 +176,39 @@ export const Search = () => {
               'max-h-80 w-[calc(100vw-16px)] max-w-xl overflow-y-auto':
                 activeMenu === 'search',
               'w-44': activeMenu === 'avatar',
-              hidden: activeMenu === 'search' && !data,
             },
           )}
         >
           {activeMenu === 'search' ? (
-            data?.tracks.items.map((track) => (
-              <SearchItem
-                key={track.id}
-                onPick={closeMenu}
-                imagePreview={track.album.images.at(-1)?.url}
-                track={{
-                  image: track.album.images.at(-2)?.url,
-                  name: track.name,
-                  artist: track.artists.map((v) => v.name).join(', '),
-                }}
-              />
-            ))
+            query.length && data ? (
+              data?.tracks.items.map((track) => (
+                <SearchItem
+                  key={track.id}
+                  onPick={closeMenu}
+                  track={{
+                    id: track.id,
+                    name: track.name,
+                    artist: track.artists.map((v) => v.name).join(', '),
+                    image: track.album.images.at(-2)?.url,
+                    imagePreview: track.album.images.at(-1)?.url,
+                  }}
+                />
+              ))
+            ) : (
+              <>
+                <span className="my-1 ml-2 block text-sm text-white/30">
+                  Previous
+                </span>
+                {storedSongs?.map((track, i) => (
+                  <SearchItem
+                    key={i}
+                    onPick={closeMenu}
+                    track={track}
+                    onRemove={() => mutation.mutate(track.id)}
+                  />
+                ))}
+              </>
+            )
           ) : (
             <button
               onClick={logout}

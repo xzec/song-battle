@@ -10,6 +10,7 @@ import {
   handleSpotifyCallback,
   refreshAccessToken,
   storeTokens,
+  tokenExpiryBuffer,
   tokensAreExpired,
 } from '~/auth/spotify'
 import type {
@@ -68,69 +69,90 @@ export const SpotifyAuthProvider = ({
   )
 
   const refreshTokens = useCallback(async () => {
-    const tokens = getStoredTokens()
-    if (!tokens?.refreshToken) return
+    if (!tokens?.refreshToken) {
+      console.error('No refresh token available')
+      return
+    }
 
     if (tokensAreExpired(tokens)) {
       const newTokens = await refreshAccessToken(tokens.refreshToken)
       const stored = convertToStoredTokens(newTokens)
       void applyTokens(stored)
     }
-  }, [applyTokens])
+  }, [applyTokens, tokens])
 
-  useEffect(() => {
-    if (mountedRef.current) return
-    mountedRef.current = true
+  useEffect(
+    function authenticate() {
+      if (mountedRef.current) return
+      mountedRef.current = true
 
-    async function initialize() {
-      if (location.pathname === callbackPathname) {
-        setStatus('authenticating')
-        const searchParams = new URLSearchParams(location.search)
-        try {
-          const { tokens } = await handleSpotifyCallback(searchParams)
-          await applyTokens(tokens)
-        } catch (authError) {
-          handleError(AuthError.from(authError))
-        } finally {
-          history.replaceState(null, '', '/')
+      async function initialize() {
+        if (location.pathname === callbackPathname) {
+          setStatus('authenticating')
+          const searchParams = new URLSearchParams(location.search)
+          try {
+            const { tokens } = await handleSpotifyCallback(searchParams)
+            await applyTokens(tokens)
+          } catch (authError) {
+            handleError(AuthError.from(authError))
+          } finally {
+            history.replaceState(null, '', '/')
+          }
+          return
         }
-        return
-      }
 
-      const stored = getStoredTokens()
-      if (!stored) {
-        handleUnauthenticated()
-        return
-      }
-
-      if (tokensAreExpired(stored)) {
-        if (!stored.refreshToken) {
+        const stored = getStoredTokens()
+        if (!stored) {
           handleUnauthenticated()
           return
         }
 
-        setStatus('authenticating')
-        let tokens: StoredSpotifyTokens
-        try {
-          const refreshed = await refreshAccessToken(stored.refreshToken)
-          tokens = convertToStoredTokens({
-            ...refreshed,
-            refresh_token: refreshed.refresh_token ?? stored.refreshToken,
-          })
-        } catch (refreshError) {
-          handleError(AuthError.from(refreshError, 'refresh_failed'))
+        if (tokensAreExpired(stored)) {
+          if (!stored.refreshToken) {
+            handleUnauthenticated()
+            return
+          }
+
+          setStatus('authenticating')
+          let tokens: StoredSpotifyTokens
+          try {
+            const refreshed = await refreshAccessToken(stored.refreshToken)
+            tokens = convertToStoredTokens({
+              ...refreshed,
+              refresh_token: refreshed.refresh_token ?? stored.refreshToken,
+            })
+          } catch (refreshError) {
+            handleError(AuthError.from(refreshError, 'refresh_failed'))
+            return
+          }
+          await applyTokens(tokens)
           return
         }
-        await applyTokens(tokens)
-        return
+
+        setStatus('authenticating')
+        await applyTokens(stored)
       }
 
-      setStatus('authenticating')
-      await applyTokens(stored)
-    }
+      void initialize()
+    },
+    [handleError, handleUnauthenticated, applyTokens],
+  )
 
-    void initialize()
-  }, [handleError, handleUnauthenticated, applyTokens])
+  useEffect(
+    function refreshTokenTimer() {
+      if (!tokens) return
+
+      const timeoutId = setTimeout(
+        () => void refreshTokens(),
+        tokens.expiresAt - Date.now() - tokenExpiryBuffer,
+      )
+
+      return () => {
+        if (timeoutId !== undefined) clearTimeout(timeoutId)
+      }
+    },
+    [refreshTokens, tokens],
+  )
 
   const login = useCallback(() => {
     setStatus('authenticating')

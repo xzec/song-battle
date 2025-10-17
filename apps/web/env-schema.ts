@@ -10,6 +10,7 @@ export const envSchema = z.object({
     .describe(
       'Redirect URI for the Spotify App. Must be registered in Spotify Developer Dashboard.',
     ),
+  VITE_API_URL: z.url().describe('URL of the tiny Hono backend.'),
 })
 
 export type EnvSchema = z.infer<typeof envSchema>

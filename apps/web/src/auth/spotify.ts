@@ -14,7 +14,7 @@ const tokenUrl = 'https://accounts.spotify.com/api/token'
 
 const pkceStorageKey = 'spotify:pkce:state'
 const tokenStorageKey = 'spotify:auth:tokens'
-const tokenExpiryBuffer = 60_000
+export const tokenExpiryBuffer = 60_000
 
 function generateRandomString(length: number) {
   const possible =
