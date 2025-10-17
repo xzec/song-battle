@@ -1,6 +1,10 @@
 {
   "extends": "@repo/tsconfig/tsconfig.node.json",
   "compilerOptions": {
-    "jsxImportSource": "hono/jsx"
+    "jsxImportSource": "hono/jsx",
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["src/*"]
+    }
   }
 }

@@ -2,13 +2,14 @@
   "name": "server",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsdown src/index.ts",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsdown src/server.ts",
     "start": "node dist/index.js"
   },
   "dependencies": {
     "@hono/node-server": "^1.19.5",
     "hono": "^4.10.0",
+    "redis": "^5.8.3",
     "winston": "^3.18.3"
   },
   "devDependencies": {
