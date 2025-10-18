@@ -1,10 +1,16 @@
 import { Bracket } from '~/components/Bracket'
 import { Search } from '~/components/Search'
 import { useBattle } from '~/context/BattleContext'
+import { getBracketsOnDepth } from '~/context/brackets'
 import { toArrayPairs } from '~/utils/to-array-pairs'
 
 export const Battle = () => {
-  const { brackets, quarters, semi, final, getBracketById } = useBattle()
+  const { tree } = useBattle()
+
+  const contestants = getBracketsOnDepth(tree, 4)
+  const quarters = getBracketsOnDepth(tree, 3)
+  const semis = getBracketsOnDepth(tree, 2)
+  const finals = getBracketsOnDepth(tree, 1)
 
   return (
     <>
@@ -15,77 +21,45 @@ export const Battle = () => {
       </div>
       <main className="relative flex gap-4 py-20">
         <div className="flex flex-col gap-2 p-2 *:last:mb-0! *:even:mb-8">
-          {brackets.map((bracket) => (
-            <Bracket
-              key={bracket.id}
-              interactive
-              bracketId={bracket.id}
-              track={bracket.track}
-            />
+          {contestants.map((bracket) => (
+            <Bracket key={bracket.id} interactive bracket={bracket} />
           ))}
         </div>
         <div className="flex flex-col justify-evenly p-2">
-          {toArrayPairs(quarters).map(([bracketA, bracketB], index) => (
+          {toArrayPairs(quarters).map(([left, right], index) => (
             <div
               key={index}
               className="flex h-full flex-col justify-center gap-2"
             >
-              <Bracket
-                bracketId={bracketA.id}
-                track={bracketA.track}
-                prevA={getBracketById(bracketA.prev![0])}
-                prevB={getBracketById(bracketA.prev![1])}
-              />
-              <Bracket
-                bracketId={bracketB.id}
-                track={bracketB.track}
-                prevA={getBracketById(bracketB.prev![0])}
-                prevB={getBracketById(bracketB.prev![1])}
-              />
+              <Bracket bracket={left} />
+              <Bracket bracket={right} />
             </div>
           ))}
         </div>
         <div className="flex flex-col justify-evenly p-2">
-          {toArrayPairs(semi).map(([bracketA, bracketB], index) => (
+          {toArrayPairs(semis).map(([left, right], index) => (
             <div
               key={index}
               className="flex h-full flex-col justify-center gap-2"
             >
-              <Bracket
-                bracketId={bracketA.id}
-                track={bracketA.track}
-                prevA={getBracketById(bracketA.prev![0])}
-                prevB={getBracketById(bracketA.prev![1])}
-              />
-              <Bracket
-                bracketId={bracketB.id}
-                track={bracketB.track}
-                prevA={getBracketById(bracketB.prev![0])}
-                prevB={getBracketById(bracketB.prev![1])}
-              />
+              <Bracket bracket={left} />
+              <Bracket bracket={right} />
             </div>
           ))}
         </div>
         <div className="flex flex-col justify-evenly p-2">
-          {toArrayPairs(final).map(([bracketA, bracketB], index) => (
+          {toArrayPairs(finals).map(([left, right], index) => (
             <div
               key={index}
               className="flex h-full flex-col justify-center gap-2"
             >
-              <Bracket
-                bracketId={bracketA.id}
-                track={bracketA.track}
-                prevA={getBracketById(bracketA.prev![0])}
-                prevB={getBracketById(bracketA.prev![1])}
-              />
-              <Bracket
-                bracketId={bracketB.id}
-                track={bracketB.track}
-                prevA={getBracketById(bracketB.prev![0])}
-                prevB={getBracketById(bracketB.prev![1])}
-              />
+              <Bracket bracket={left} />
+              <Bracket bracket={right} />
             </div>
           ))}
+        </div>
+        <div className="flex flex-col justify-center p-2">
+          <Bracket bracket={tree} />
         </div>
       </main>
     </>
