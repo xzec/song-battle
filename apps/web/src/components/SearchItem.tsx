@@ -14,16 +14,22 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
   const { addTrackToFirstAvailableBracket } = useBattle()
   const imgRef = useRef<HTMLImageElement>(null)
 
+  const handlePick = () => {
+    addTrackToFirstAvailableBracket(track)
+    onPick?.()
+  }
+
   const removable = typeof onRemove === 'function'
 
   return (
-    <button
+    <div
+      role="button"
       tabIndex={0}
       draggable
-      onClick={() => {
-        addTrackToFirstAvailableBracket(track)
-        onPick?.()
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') handlePick()
       }}
+      onClick={handlePick}
       onDragStart={(e) => {
         e.dataTransfer.setData('application/json', JSON.stringify(track))
         if (imgRef.current) {
@@ -64,6 +70,6 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
           <Icon icon="ic:baseline-clear" inline />
         </button>
       )}
-    </button>
+    </div>
   )
 }
