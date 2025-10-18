@@ -8,7 +8,8 @@ import {
   unstable_ViewTransition as ViewTransition,
 } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
-import { deleteStoredSong, getStoredSongs, hitSearch } from '~/api'
+import { deleteStoredSong, getStoredSongs } from '~/api/backend'
+import { hitSearch } from '~/api/spotify'
 import { useSpotifyAuth, useUser } from '~/auth/SpotifyAuthContext'
 import { SearchItem } from '~/components/SearchItem'
 import { useBattle } from '~/context/BattleContext'
