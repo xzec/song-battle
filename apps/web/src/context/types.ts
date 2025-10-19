@@ -18,10 +18,14 @@ export type BracketNode = {
 
 export type BattleContextValue = {
   tree: BracketNode
-  setTree: Dispatch<React.SetStateAction<BracketNode>>
   addTrackToBracket: (bracketId: string, track: Track) => void
   addTrackToFirstAvailableBracket: (track: Track) => void
   activeBracketId: string | null
   setActiveBracketId: Dispatch<React.SetStateAction<string | null>>
   searchRef: React.RefObject<HTMLInputElement | null>
+  bracketRect: Map<string, DOMRect>
+  registerBracketRect: (bracketId: string, rect: DOMRect) => void
+  edges: Edge[]
 }
+
+export type Edge = [x1: number, y1: number, x2: number, y2: number]

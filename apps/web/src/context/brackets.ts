@@ -1,4 +1,4 @@
-import type { BracketNode } from '~/context/types'
+import type { BracketNode, Edge } from '~/context/types'
 
 export const LAYERS = [
   'winner',
@@ -89,4 +89,34 @@ export function updateBracketById(
     left: node.left ? updateBracketById(node.left, bracketId, patch) : null,
     right: node.right ? updateBracketById(node.right, bracketId, patch) : null,
   }
+}
+
+export function createEdges(
+  node: BracketNode,
+  bracketRect: Map<string, DOMRect>,
+  result: Edge[] = [],
+) {
+  function getEdge(nextRect: DOMRect, prevRect: DOMRect) {
+    const x1 = prevRect.right
+    const y1 = (prevRect.top + prevRect.bottom) / 2
+    const x2 = nextRect.left
+    const y2 = (nextRect.top + nextRect.bottom) / 2
+    return [x1, y1, x2, y2] as Edge
+  }
+
+  function traverse(next: BracketNode) {
+    if (!next.left || !next.right) return result
+    const nextRect = bracketRect.get(next.id)
+    const leftRect = bracketRect.get(next.left.id)
+    const rightRect = bracketRect.get(next.right.id)
+    if (!nextRect || !leftRect || !rightRect) return result
+
+    result.push(getEdge(nextRect, leftRect), getEdge(nextRect, rightRect))
+    traverse(next.left)
+    traverse(next.right)
+
+    return result
+  }
+
+  return traverse(node)
 }

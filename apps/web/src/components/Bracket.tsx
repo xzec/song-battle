@@ -1,5 +1,5 @@
 import { Icon } from '@iconify-icon/react'
-import { useState } from 'react'
+import { type RefCallback, useCallback, useState } from 'react'
 import { useBattle } from '~/context/BattleContext'
 import type { BracketNode, Track } from '~/context/types'
 import { cn } from '~/utils/cn'
@@ -15,14 +15,28 @@ export const Bracket = ({
   className,
   ...props
 }: BracketProps) => {
-  const { searchRef } = useBattle()
   const [isDragOver, setIsDragOver] = useState(false)
-  const { addTrackToBracket, activeBracketId, setActiveBracketId } = useBattle()
+  const {
+    addTrackToBracket,
+    searchRef,
+    registerBracketRect,
+    activeBracketId,
+    setActiveBracketId,
+  } = useBattle()
 
   const canBattle = Boolean(bracket.left?.track && bracket.right?.track)
 
+  const ref = useCallback<RefCallback<HTMLDivElement>>(
+    (element) => {
+      if (!element) return
+      registerBracketRect(bracket.id, element.getBoundingClientRect())
+    },
+    [bracket.id, registerBracketRect],
+  )
+
   return (
     <div
+      ref={ref}
       className={cn(
         'flex h-20 w-72 items-center overflow-hidden rounded-xl border-2 border-zinc-500 border-dashed bg-zinc-700/20 text-sm shadow-lg transition',
         {

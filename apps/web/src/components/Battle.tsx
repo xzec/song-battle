@@ -2,10 +2,11 @@ import { Bracket } from '~/components/Bracket'
 import { Search } from '~/components/Search'
 import { useBattle } from '~/context/BattleContext'
 import { getBracketsOnDepth } from '~/context/brackets'
+import { getLinkPath } from '~/utils/get-link-path'
 import { toArrayPairs } from '~/utils/to-array-pairs'
 
 export const Battle = () => {
-  const { tree } = useBattle()
+  const { tree, edges } = useBattle()
 
   const contestants = getBracketsOnDepth(tree, 4)
   const quarters = getBracketsOnDepth(tree, 3)
@@ -19,7 +20,7 @@ export const Battle = () => {
           <Search />
         </header>
       </div>
-      <main className="relative flex gap-4 py-20">
+      <main className="relative flex w-fit gap-4 py-20">
         <div className="flex flex-col gap-2 p-2 *:last:mb-0! *:even:mb-8">
           {contestants.map((bracket) => (
             <Bracket key={bracket.id} interactive bracket={bracket} />
@@ -61,6 +62,14 @@ export const Battle = () => {
         <div className="flex flex-col justify-center p-2">
           <Bracket bracket={tree} />
         </div>
+        {edges.map((edge, i) => (
+          <svg
+            key={i}
+            className="pointer-events-none absolute top-0 left-0 z-100 size-full fill-none stroke-2 stroke-zinc-700"
+          >
+            <path d={getLinkPath(...edge)} />
+          </svg>
+        ))}
       </main>
     </>
   )

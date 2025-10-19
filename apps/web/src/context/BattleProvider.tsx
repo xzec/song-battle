@@ -5,11 +5,12 @@ import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 import { BattleContext } from '~/context/BattleContext'
 import {
   createBrackets,
+  createEdges,
   getBracketsOnDepth,
   TREE_DEPTH,
   updateBracketById,
 } from '~/context/brackets'
-import type { Track } from '~/context/types'
+import type { Edge, Track } from '~/context/types'
 
 export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
   const [tree, setTree] = useState(createBrackets())
@@ -17,6 +18,12 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
   const searchRef = useRef<HTMLInputElement>(null)
   const { tokens } = useSpotifyAuth()
   const queryClient = useQueryClient()
+  const [bracketRect, setBracketRect] = useState(new Map<string, DOMRect>())
+  const edges = useMemo<Edge[]>(() => {
+    if (!bracketRect) return []
+    return createEdges(tree, bracketRect)
+  }, [bracketRect, tree])
+
   const storeSongMutation = useMutation({
     mutationFn: async (track: Track) => {
       if (tokens?.accessToken) await storeSong(track, tokens?.accessToken)
@@ -74,22 +81,37 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
     [activeBracketId, addTrackToBracket, tree],
   )
 
+  const registerBracketRect = useCallback(
+    (bracketId: string, rect: DOMRect) => {
+      setBracketRect((prev) => {
+        const map = new Map(prev)
+        map.set(bracketId, rect)
+        return map
+      })
+    },
+    [],
+  )
+
   const value = useMemo(
     () => ({
       tree,
-      setTree,
       addTrackToBracket,
       addTrackToFirstAvailableBracket,
       activeBracketId,
       setActiveBracketId,
       searchRef,
+      bracketRect,
+      registerBracketRect,
+      edges,
     }),
     [
       tree,
-      setTree,
       addTrackToBracket,
       addTrackToFirstAvailableBracket,
       activeBracketId,
+      bracketRect,
+      registerBracketRect,
+      edges,
     ],
   )
 

@@ -6,7 +6,7 @@ export function getLinkPath(x1: number, y1: number, x2: number, y2: number) {
   const yDir = Math.sign(y2 - y1)
 
   // calculate the bend radius, clamp if needed
-  const maxRadius = 10
+  const maxRadius = 8
   const xDistance = Math.abs(x2 - x1)
   const yDistance = Math.abs(y2 - y1)
   const radius = Math.min(
