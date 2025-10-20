@@ -38,12 +38,13 @@ export const Bracket = ({
     <div
       ref={ref}
       className={cn(
-        'flex h-20 w-72 items-center overflow-hidden rounded-xl border-2 border-zinc-500 border-dashed bg-zinc-700/20 text-sm shadow-lg transition',
+        'flex h-20 w-72 items-center overflow-hidden rounded-xl border-2 border-zinc-700 border-dashed bg-zinc-700/10 text-sm shadow-lg transition',
         {
-          'border-blue-500 bg-zinc-400/30': bracket.id === activeBracketId,
           'border border-white/10 border-solid bg-zinc-950': bracket.track,
-          'border-green-500': isDragOver,
-          'cursor-pointer justify-center': !bracket.track && interactive,
+          'cursor-pointer justify-center border-zinc-400 bg-zinc-700/30':
+            !bracket.track && interactive,
+          'border-blue-500 bg-zinc-400/30': bracket.id === activeBracketId,
+          'border-green-500 bg-green-500/20': isDragOver,
           className,
         },
       )}
@@ -54,11 +55,13 @@ export const Bracket = ({
       }}
       onDragOver={(e) => {
         e.preventDefault()
-        setIsDragOver(true)
+        e.dataTransfer.dropEffect = interactive ? 'copy' : 'none'
+        if (interactive) setIsDragOver(true)
       }}
       onDragLeave={() => setIsDragOver(false)}
       onDrop={(e) => {
         setIsDragOver(false)
+        if (!interactive) return
         const track = JSON.parse(
           e.dataTransfer.getData('application/json'),
         ) as Track
@@ -83,10 +86,16 @@ export const Bracket = ({
           </div>
         </>
       ) : interactive ? (
-        <div className="text-white/50">
-          <span>Add track</span>
-          <Icon icon="icon-park-outline:add-one" className="ml-1" inline />
-        </div>
+        <>
+          {isDragOver ? (
+            <span className="text-green-500">Release to add</span>
+          ) : (
+            <div className="text-white">
+              <span>Add track</span>
+              <Icon icon="icon-park-outline:add-one" className="ml-1" inline />
+            </div>
+          )}
+        </>
       ) : canBattle ? (
         'do it'
       ) : null}

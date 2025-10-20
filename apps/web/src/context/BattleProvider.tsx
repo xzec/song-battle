@@ -53,6 +53,7 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
   const addTrackToBracket = useCallback(
     (bracketId: string, track: Track) => {
       setTree((prev) => updateBracketById(prev, bracketId, { track }))
+      setActiveBracketId(null)
       void storeSongMutation.mutate(track)
     },
     [storeSongMutation],
