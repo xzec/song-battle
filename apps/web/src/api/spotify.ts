@@ -8,7 +8,6 @@ export async function hitSearch(
   const params = {
     q: query,
     type: 'track',
-    market: 'US',
     limit: '10',
   }
 

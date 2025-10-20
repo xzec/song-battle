@@ -87,7 +87,7 @@ export const Search = () => {
         <div
           ref={searchBarRef}
           className={cn(
-            'focus-within:emerald-ring pointer-events-auto flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white backdrop-blur-2xl transition',
+            'focus-within:emerald-ring pointer-events-auto flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white backdrop-blur-lg transition',
             'border border-white/10 focus-within:border-transparent hover:not-focus-within:not-active:border-white/30',
             'bg-zinc-900/40 focus-within:bg-zinc-950/80',
             'inset-shadow-sm inset-shadow-zinc-900/40 shadow-md shadow-zinc-900/25',
@@ -137,7 +137,7 @@ export const Search = () => {
           <button
             type="button"
             className={cn(
-              'flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border bg-white/10 font-medium text-sm text-white/80 ring-emerald-500 transition hover:text-white focus-visible:ring-0',
+              'flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border bg-white/10 font-medium text-sm text-white/80 transition hover:text-white focus-visible:ring-0',
               'border-white/10 hover:border-white/30 focus-visible:border-white/80',
             )}
             aria-label="Open account menu"
@@ -172,7 +172,7 @@ export const Search = () => {
           onOpenAutoFocus={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => event.preventDefault()}
           className={cn(
-            'scrollbar-none pointer-events-auto relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg backdrop-blur-xl',
+            'scrollbar-none pointer-events-auto relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg backdrop-blur-lg',
             {
               'max-h-80 w-[calc(100vw-16px)] max-w-xl overflow-y-auto':
                 activeMenu === 'search',

@@ -9,12 +9,12 @@ interface BracketProps extends React.HTMLAttributes<HTMLDivElement> {
   bracket: BracketNode
 }
 
-export const Bracket = ({
+export function Bracket({
   interactive = false,
   bracket,
   className,
   ...props
-}: BracketProps) => {
+}: BracketProps) {
   const [isDragOver, setIsDragOver] = useState(false)
   const {
     addTrackToBracket,
@@ -25,6 +25,7 @@ export const Bracket = ({
   } = useBattle()
 
   const canBattle = Boolean(bracket.left?.track && bracket.right?.track)
+  const isActive = bracket.id === activeBracketId
 
   const ref = useCallback<RefCallback<HTMLDivElement>>(
     (element) => {
@@ -38,13 +39,13 @@ export const Bracket = ({
     <div
       ref={ref}
       className={cn(
-        'flex h-20 w-72 items-center overflow-hidden rounded-xl border-2 border-zinc-700 border-dashed bg-zinc-700/10 text-sm shadow-lg transition',
+        'relative flex h-20 items-center overflow-hidden rounded-xl border border-violet-300 text-sm transition',
         {
-          'border border-white/10 border-solid bg-zinc-950': bracket.track,
-          'cursor-pointer justify-center border-zinc-400 bg-zinc-700/30':
+          'cursor-pointer justify-center border-dashed bg-zinc-700/30':
             !bracket.track && interactive,
-          'border-blue-500 bg-zinc-400/30': bracket.id === activeBracketId,
-          'border-green-500 bg-green-500/20': isDragOver,
+          'border-blue-500 border-solid bg-blue-500/10': isActive,
+          'border-green-500 border-solid bg-green-500/20': isDragOver,
+          'border-none bg-zinc-950 shadow-sm': bracket.track,
           className,
         },
       )}
@@ -75,7 +76,7 @@ export const Bracket = ({
             <img
               src={bracket.track.image}
               alt=""
-              className="pointer-events-none h-full select-none"
+              className="pointer-events-none aspect-square h-full select-none object-cover"
             />
           ) : (
             <div className="size-12">No image</div>
@@ -89,6 +90,8 @@ export const Bracket = ({
         <>
           {isDragOver ? (
             <span className="text-green-500">Release to add</span>
+          ) : isActive ? (
+            <span className="text-blue-500">Choose from search</span>
           ) : (
             <div className="text-white">
               <span>Add track</span>

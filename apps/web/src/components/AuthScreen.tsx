@@ -8,7 +8,7 @@ export const AuthScreen = () => {
     <div className="flex min-h-screen items-center justify-center px-6 py-16">
       <div className="w-full max-w-md rounded-3xl border border-white/10 bg-zinc-950/60 p-10 shadow-2xl backdrop-blur-xl">
         <span className="inline-flex items-center gap-2 text-sm text-white/60 uppercase tracking-[0.3em]">
-          <span className="h-1 w-1 rounded-full bg-emerald-500" />
+          <span className="h-1 w-1 rounded-full bg-green-500" />
           Song Battle
         </span>
         <h1 className="mt-5 font-semibold text-3xl text-white leading-tight md:text-4xl">
@@ -25,7 +25,7 @@ export const AuthScreen = () => {
         )}
         <button
           onClick={login}
-          className="mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-emerald-500 px-6 py-3 font-medium text-base text-black transition hover:bg-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-200"
+          className="focus-visible:emerald-ring mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-green-400 px-6 py-3 font-medium text-base text-black transition hover:bg-green-500 focus-visible:ring-white"
         >
           <SpotifyIcon className="h-5 w-5" />
           Continue with Spotify

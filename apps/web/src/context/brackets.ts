@@ -98,9 +98,10 @@ export function createEdges(
 ) {
   function getEdge(nextRect: DOMRect, prevRect: DOMRect) {
     const x1 = prevRect.right
-    const y1 = (prevRect.top + prevRect.bottom) / 2
+    let y1 = (prevRect.top + prevRect.bottom) / 2
     const x2 = nextRect.left
     const y2 = (nextRect.top + nextRect.bottom) / 2
+    if (Math.abs(y1 - y2) <= 1) y1 = y2 // handle bad-looking 1 px offsets
     return [x1, y1, x2, y2] as Edge
   }
 

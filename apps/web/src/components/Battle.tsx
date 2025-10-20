@@ -1,4 +1,5 @@
 import { Bracket } from '~/components/Bracket'
+import * as Column from '~/components/Column'
 import { Search } from '~/components/Search'
 import { useBattle } from '~/context/BattleContext'
 import { getBracketsOnDepth } from '~/context/brackets'
@@ -20,56 +21,59 @@ export const Battle = () => {
           <Search />
         </header>
       </div>
-      <main className="relative flex w-fit gap-4 py-20">
-        <div className="flex flex-col gap-2 p-2 *:last:mb-0! *:even:mb-8">
-          {contestants.map((bracket) => (
-            <Bracket key={bracket.id} interactive bracket={bracket} />
+      <main className="relative mb-3 grid w-full grid-cols-5 gap-6 px-3 pt-20">
+        <Column.Root>
+          <Column.Title>Contestants</Column.Title>
+          <Column.Content className="*:last:mb-0! *:even:mb-8">
+            {contestants.map((bracket) => (
+              <Bracket key={bracket.id} interactive bracket={bracket} />
+            ))}
+          </Column.Content>
+        </Column.Root>
+        <Column.Root>
+          <Column.Title>Quarter</Column.Title>
+          <Column.Content className="h-full justify-evenly">
+            {toArrayPairs(quarters).map(([left, right], index) => (
+              <div key={index} className="flex flex-col justify-center gap-2">
+                <Bracket bracket={left} />
+                <Bracket bracket={right} />
+              </div>
+            ))}
+          </Column.Content>
+        </Column.Root>
+        <Column.Root>
+          <Column.Title>Semi</Column.Title>
+          <Column.Content className="h-full justify-evenly">
+            {toArrayPairs(semis).map(([left, right], index) => (
+              <div key={index} className="flex flex-col justify-center gap-2">
+                <Bracket bracket={left} />
+                <Bracket bracket={right} />
+              </div>
+            ))}
+          </Column.Content>
+        </Column.Root>
+        <Column.Root>
+          <Column.Title>Final</Column.Title>
+          <Column.Content className="h-full justify-evenly">
+            {toArrayPairs(finals).map(([left, right], index) => (
+              <div key={index} className="flex flex-col justify-center gap-2">
+                <Bracket bracket={left} />
+                <Bracket bracket={right} />
+              </div>
+            ))}
+          </Column.Content>
+        </Column.Root>
+        <Column.Root>
+          <Column.Title>Winner</Column.Title>
+          <Column.Content className="h-full justify-center">
+            <Bracket bracket={tree} />
+          </Column.Content>
+        </Column.Root>
+        <svg className="pointer-events-none absolute top-0 left-0 size-full fill-none stroke-1 stroke-violet-300">
+          {edges.map((edge, i) => (
+            <path key={i} d={getLinkPath(...edge)} />
           ))}
-        </div>
-        <div className="flex flex-col justify-evenly p-2">
-          {toArrayPairs(quarters).map(([left, right], index) => (
-            <div
-              key={index}
-              className="flex h-full flex-col justify-center gap-2"
-            >
-              <Bracket bracket={left} />
-              <Bracket bracket={right} />
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col justify-evenly p-2">
-          {toArrayPairs(semis).map(([left, right], index) => (
-            <div
-              key={index}
-              className="flex h-full flex-col justify-center gap-2"
-            >
-              <Bracket bracket={left} />
-              <Bracket bracket={right} />
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col justify-evenly p-2">
-          {toArrayPairs(finals).map(([left, right], index) => (
-            <div
-              key={index}
-              className="flex h-full flex-col justify-center gap-2"
-            >
-              <Bracket bracket={left} />
-              <Bracket bracket={right} />
-            </div>
-          ))}
-        </div>
-        <div className="flex flex-col justify-center p-2">
-          <Bracket bracket={tree} />
-        </div>
-        {edges.map((edge, i) => (
-          <svg
-            key={i}
-            className="pointer-events-none absolute top-0 left-0 z-100 size-full fill-none stroke-2 stroke-zinc-700"
-          >
-            <path d={getLinkPath(...edge)} />
-          </svg>
-        ))}
+        </svg>
       </main>
     </>
   )

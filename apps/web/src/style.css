@@ -75,7 +75,7 @@
 }
 
 @utility emerald-ring {
-  @apply ring-green-400 ring-2 transition-shadow outline-none;
+  @apply ring-green-500 ring-2 transition-shadow outline-none;
 }
 
 @utility scrollbar-none {

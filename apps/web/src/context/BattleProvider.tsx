@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { storeSong } from '~/api/backend'
 import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 import { BattleContext } from '~/context/BattleContext'
@@ -23,6 +23,10 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
     if (!bracketRect) return []
     return createEdges(tree, bracketRect)
   }, [bracketRect, tree])
+
+  useEffect(() => {
+    console.log('bracketRect', bracketRect)
+  }, [bracketRect])
 
   const storeSongMutation = useMutation({
     mutationFn: async (track: Track) => {
