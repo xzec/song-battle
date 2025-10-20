@@ -24,7 +24,6 @@ export const Search = () => {
   const [shadowOpen, setShadowOpen] = useState(false)
   const [activeMenu, setActiveMenu] = useState<'search' | 'avatar' | null>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
-  const disposeRef = useRef<HTMLDivElement>(null)
   const user = useUser()
   const queryClient = useQueryClient()
   const avatarInitial = user.display_name?.trim().charAt(0) ?? '?'
@@ -62,11 +61,6 @@ export const Search = () => {
     onSuccess: () => void refetchStoredSongs(),
   })
 
-  useHotkeys('meta+k', () => searchRef?.current?.focus())
-  useHotkeys('esc', () => disposeRef?.current?.focus(), {
-    enableOnFormTags: true,
-  })
-
   const openMenu = (type: 'search' | 'avatar') => {
     setShadowOpen(true)
     startTransition(() => {
@@ -76,10 +70,15 @@ export const Search = () => {
   }
 
   const closeMenu = () => {
+    if (document.activeElement instanceof HTMLElement)
+      document.activeElement.blur()
     setShadowOpen(false)
     setOpen(false)
     setActiveBracketId(null)
   }
+
+  useHotkeys('meta+k', () => searchRef?.current?.focus())
+  useHotkeys('esc', closeMenu, { enableOnFormTags: true })
 
   return (
     <Popover.Root open={open} modal={false}>
@@ -87,13 +86,10 @@ export const Search = () => {
         <div
           ref={searchBarRef}
           className={cn(
-            'focus-within:emerald-ring pointer-events-auto flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white backdrop-blur-lg transition',
-            'border border-white/10 focus-within:border-transparent hover:not-focus-within:not-active:border-white/30',
-            'bg-zinc-900/40 focus-within:bg-zinc-950/80',
-            'inset-shadow-sm inset-shadow-zinc-900/40 shadow-md shadow-zinc-900/25',
-            {
-              'emerald-ring border-transparent bg-zinc-950/80': open,
-            },
+            'pointer-events-auto flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white transition',
+            'group-focus-within:emerald-ring border border-white/30 hover:not-focus-within:not-active:border-white/50 group-focus-within:border-transparent',
+            'bg-zinc-950/30 backdrop-blur-lg group-focus-within:bg-zinc-950/80',
+            'inset-shadow-sm inset-shadow-zinc-900/25 shadow-sm shadow-zinc-900/25',
           )}
           onClick={() => {
             openMenu('search')
@@ -172,7 +168,7 @@ export const Search = () => {
           onOpenAutoFocus={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => event.preventDefault()}
           className={cn(
-            'scrollbar-none pointer-events-auto relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/70 p-3 text-white shadow-lg backdrop-blur-lg',
+            'scrollbar-none pointer-events-auto relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/80 p-3 text-white shadow-lg backdrop-blur-lg',
             {
               'max-h-80 w-[calc(100vw-16px)] max-w-xl overflow-y-auto':
                 activeMenu === 'search',
@@ -221,7 +217,6 @@ export const Search = () => {
           )}
         </Popover.Content>
       </ViewTransition>
-      <div tabIndex={1} ref={disposeRef} />
     </Popover.Root>
   )
 }

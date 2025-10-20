@@ -16,12 +16,12 @@ export const Battle = () => {
 
   return (
     <>
-      <div className="pointer-events-none fixed z-100 flex w-full justify-center bg-linear-to-b from-zinc-900/60 to-transparent p-2">
-        <header className="flex w-full max-w-xl items-center">
+      <div className="pointer-events-none fixed z-100 flex w-full justify-center bg-linear-to-b from-zinc-900/50 to-transparent p-2">
+        <header className="group flex w-full max-w-xl items-center">
           <Search />
         </header>
       </div>
-      <main className="relative mb-3 grid w-full grid-cols-5 gap-6 px-3 pt-20">
+      <main className="relative grid w-full grid-cols-5 gap-6 p-3 pt-20">
         <Column.Root>
           <Column.Title>Contestants</Column.Title>
           <Column.Content className="*:last:mb-0! *:even:mb-8">
