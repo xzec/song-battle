@@ -10,7 +10,7 @@ type SearchItemsProps = {
   onRemove?: () => void
 }
 
-export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
+export function SearchItem({ track, onPick, onRemove }: SearchItemsProps) {
   const { addTrackToFirstAvailableBracket } = useBattle()
   const imgRef = useRef<HTMLImageElement>(null)
 
@@ -27,7 +27,10 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
       tabIndex={0}
       draggable
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') handlePick()
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handlePick()
+        }
       }}
       onClick={handlePick}
       onDragStart={(e) => {
@@ -42,15 +45,7 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
       }}
       className="focus-visible:emerald-ring flex w-full cursor-pointer items-center gap-3 rounded-xl p-2 text-left text-sm transition hover:bg-white/10 focus-visible:bg-white/10"
     >
-      <img
-        ref={imgRef}
-        src={track.imagePreview}
-        width={40}
-        height={40}
-        className="rounded-md"
-        alt=""
-        draggable={false}
-      />
+      <SearchItemImage ref={imgRef} src={track.imagePreview} />
       <div className="flex grow flex-col justify-center">
         <span className="font-medium">{track.name}</span>
         <span className="text-white/50">{track.artist}</span>
@@ -71,5 +66,29 @@ export const SearchItem = ({ track, onPick, onRemove }: SearchItemsProps) => {
         </button>
       )}
     </div>
+  )
+}
+
+function SearchItemImage({
+  src,
+  className,
+  ...props
+}: React.ComponentProps<'img'>) {
+  if (!src)
+    return (
+      <div className="flex aspect-square size-10 items-center justify-center">
+        <Icon icon="ph:waveform-bold" width={16} height={16} />
+      </div>
+    )
+
+  return (
+    <img
+      src={src}
+      width={40}
+      height={40}
+      alt=""
+      className={cn('pointer-events-none rounded-md object-cover', className)}
+      {...props}
+    />
   )
 }

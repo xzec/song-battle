@@ -4,7 +4,7 @@ export function Root({
   children,
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.ComponentProps<'div'>) {
   return (
     <div className={cn('flex flex-col gap-2', className)} {...props}>
       {children}
@@ -16,7 +16,7 @@ export function Title({
   children,
   className,
   ...props
-}: React.HTMLAttributes<HTMLParagraphElement>) {
+}: React.ComponentProps<'p'>) {
   return (
     <p
       className={cn(
@@ -34,7 +34,7 @@ export function Content({
   children,
   className,
   ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+}: React.ComponentProps<'div'>) {
   return (
     <div
       className={cn(
