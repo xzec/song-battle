@@ -172,12 +172,11 @@ export const SpotifyAuthProvider = ({
       status,
       user,
       tokens,
-      refreshTokens,
       error,
       login,
       logout,
     }),
-    [status, user, tokens, refreshTokens, error, login, logout],
+    [status, user, tokens, error, login, logout],
   )
 
   return <SpotifyAuthContext value={value}>{children}</SpotifyAuthContext>

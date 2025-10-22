@@ -3,12 +3,13 @@ const searchUrl = 'https://api.spotify.com/v1/search'
 export async function hitSearch(
   query: string,
   accessToken: string,
-  refreshTokens: () => Promise<void>,
+  country: string,
 ) {
   const params = {
     q: query,
     type: 'track',
     limit: '10',
+    market: country,
   }
 
   const url = new URL(searchUrl)
@@ -23,7 +24,6 @@ export async function hitSearch(
   if (!res.ok) {
     const parsed = (await res.json()) as SpotifyTrackSearchError
     console.error(parsed)
-    if (parsed.error.status === 401) void refreshTokens()
   }
 
   const data = await res.json()

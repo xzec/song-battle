@@ -22,9 +22,10 @@ type SpotifyImage = {
 
 export type SpotifyUserProfile = {
   id: string
+  country: string
   display_name: string | null
-  email?: string
-  images?: SpotifyImage[]
+  email: string
+  images: SpotifyImage[]
 }
 
 export type AuthErrorType =

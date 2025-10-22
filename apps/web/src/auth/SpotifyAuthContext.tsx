@@ -10,7 +10,6 @@ export type SpotifyAuthValue = {
   status: AuthStatus
   user: SpotifyUserProfile | null
   tokens: StoredSpotifyTokens | null
-  refreshTokens: () => Promise<void>
   error: AuthError | null
   login: () => void
   logout: () => void
