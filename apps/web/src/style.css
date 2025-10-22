@@ -70,11 +70,11 @@
   }
 
   .animate-slide-fade[data-state="open"] {
-    animation: slide-fade-in 100ms ease-out;
+    animation: slide-fade-in 50ms ease-out;
   }
 
   .animate-slide-fade[data-state="closed"] {
-    animation: slide-fade-out 100ms ease-out;
+    animation: slide-fade-out 50ms ease-out;
   }
 }
 
