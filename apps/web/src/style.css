@@ -40,6 +40,10 @@
       @apply emerald-ring;
     }
   }
+
+  ::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+  }
 }
 
 @layer utilities {

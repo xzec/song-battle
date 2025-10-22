@@ -1,5 +1,6 @@
 import { Icon } from '@iconify-icon/react'
 import * as Popover from '@radix-ui/react-popover'
+import { useDebouncedValue } from '@tanstack/react-pacer'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   startTransition,
@@ -17,25 +18,28 @@ import type { Track } from '~/context/types'
 import { cn } from '~/utils/cn'
 
 export const Search = () => {
-  const { logout, tokens, refreshTokens } = useSpotifyAuth()
+  const { logout, tokens } = useSpotifyAuth()
   const { setActiveBracketId, searchRef } = useBattle()
   const [query, setQuery] = useState('')
+  const [deferredQuery] = useDebouncedValue(query, {
+    wait: 175,
+  })
   const [open, setOpen] = useState(false)
   const [shadowOpen, setShadowOpen] = useState(false)
   const [activeMenu, setActiveMenu] = useState<'search' | 'avatar' | null>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
   const user = useUser()
   const queryClient = useQueryClient()
-  const avatarInitial = user.display_name?.trim().charAt(0) ?? '?'
-  const avatarUrl = user.images?.[0]?.url
+  const avatarUrl = user.images[0].url
 
-  const { data } = useQuery({
-    queryKey: ['search', query],
-    queryFn: () => hitSearch(query, tokens!.accessToken, refreshTokens),
-    enabled: Boolean(tokens?.accessToken && query.length),
+  const { data: tracks } = useQuery({
+    queryKey: ['search', deferredQuery],
+    queryFn: () => hitSearch(deferredQuery, tokens!.accessToken, user.country),
+    enabled: Boolean(tokens?.accessToken && deferredQuery.length),
+    placeholderData: (previousData) => previousData,
   })
 
-  const { data: storedSongs, refetch: refetchStoredSongs } = useQuery({
+  const { data: storedTracks, refetch: refetchStoredTracks } = useQuery({
     queryKey: ['history'],
     queryFn: () => getStoredSongs(tokens!.accessToken),
     enabled: Boolean(tokens?.accessToken && !query.length),
@@ -58,7 +62,7 @@ export const Search = () => {
       if (context?.previousHistory)
         queryClient.setQueryData(['history'], context.previousHistory)
     },
-    onSuccess: () => void refetchStoredSongs(),
+    onSuccess: () => void refetchStoredTracks(),
   })
 
   const openMenu = (type: 'search' | 'avatar') => {
@@ -83,7 +87,7 @@ export const Search = () => {
   return (
     <Popover.Root open={open} modal={false}>
       <Popover.Anchor asChild>
-        <div
+        <search
           ref={searchBarRef}
           className={cn(
             'pointer-events-auto flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white transition',
@@ -97,12 +101,15 @@ export const Search = () => {
           }}
         >
           <Icon
+            aria-hidden="true"
+            title="Search"
             icon="radix-icons:magnifying-glass"
             width={32}
             height={32}
             className="text-white/50"
           />
           <input
+            type="search"
             ref={searchRef}
             placeholder="Search Spotify"
             value={query}
@@ -112,6 +119,8 @@ export const Search = () => {
           />
           {query.length ? (
             <button
+              type="button"
+              aria-label="Clear search"
               className={cn(
                 'flex size-8 items-center justify-center rounded-full text-white/50 transition-opacity hover:text-white',
               )}
@@ -142,18 +151,14 @@ export const Search = () => {
               openMenu('avatar')
             }}
           >
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt=""
-                className="pointer-events-none h-full w-full object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <span className="uppercase">{avatarInitial}</span>
-            )}
+            <img
+              src={avatarUrl}
+              alt="Spotify avatar"
+              className="pointer-events-none h-full w-full object-cover"
+              loading="lazy"
+            />
           </button>
-        </div>
+        </search>
       </Popover.Anchor>
       <ViewTransition>
         <Popover.Content
@@ -177,8 +182,8 @@ export const Search = () => {
           )}
         >
           {activeMenu === 'search' ? (
-            query.length && data ? (
-              data?.tracks.items.map((track) => (
+            query.length && tracks ? (
+              tracks?.tracks.items.map((track) => (
                 <SearchItem
                   key={track.id}
                   onPick={closeMenu}
@@ -197,7 +202,7 @@ export const Search = () => {
                   Recent
                 </span>
                 <div className="mx-2 mb-2 h-[0.5px] bg-white/10" />
-                {storedSongs?.map((track, i) => (
+                {storedTracks?.map((track, i) => (
                   <SearchItem
                     key={i}
                     onPick={closeMenu}

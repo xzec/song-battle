@@ -1,5 +1,6 @@
 import js from '@eslint/js'
 import { defineConfig, globalIgnores } from 'eslint/config'
+import jsxA11y from 'eslint-plugin-jsx-a11y'
 import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import globals from 'globals'
@@ -14,12 +15,14 @@ export default defineConfig([
       tseslint.configs.recommended,
       reactHooks.configs['recommended-latest'],
       reactRefresh.configs.vite,
+      jsxA11y.flatConfigs.recommended,
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
     },
     languageOptions: {
-      ecmaVersion: 2020,
+      ...jsxA11y.flatConfigs.recommended.languageOptions,
+      ecmaVersion: 2022,
       globals: globals.browser,
     },
   },

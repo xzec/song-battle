@@ -22,21 +22,15 @@ export function SearchItem({ track, onPick, onRemove }: SearchItemsProps) {
   const removable = typeof onRemove === 'function'
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
+      aria-label="Add to battle"
       draggable
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault()
-          handlePick()
-        }
-      }}
       onClick={handlePick}
-      onDragStart={(e) => {
-        e.dataTransfer.setData('application/json', JSON.stringify(track))
+      onDragStart={(event) => {
+        event.dataTransfer.setData('application/json', JSON.stringify(track))
         if (imgRef.current) {
-          e.dataTransfer.setDragImage(
+          event.dataTransfer.setDragImage(
             imgRef.current,
             imgRef.current.clientWidth / 2,
             imgRef.current.clientHeight / 2,
@@ -51,21 +45,29 @@ export function SearchItem({ track, onPick, onRemove }: SearchItemsProps) {
         <span className="text-white/50">{track.artist}</span>
       </div>
       {removable && (
-        <button
-          type="button"
+        <div
+          role="button"
+          tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault()
+              event.stopPropagation()
+              onRemove()
+            }
+          }}
           className={cn(
             'focus-visible:emerald-ring flex size-6 items-center justify-center overflow-hidden rounded-full font-medium text-sm text-white/50 ring-emerald-500 transition hover:text-white',
           )}
           aria-label="Remove from history"
-          onClick={(e) => {
-            e.stopPropagation()
+          onClick={(event) => {
+            event.stopPropagation()
             onRemove()
           }}
         >
-          <Icon icon="ic:baseline-clear" inline />
-        </button>
+          <Icon icon="ic:baseline-clear" title="Clear" inline />
+        </div>
       )}
-    </div>
+    </button>
   )
 }
 
