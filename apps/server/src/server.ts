@@ -21,7 +21,7 @@ app.get('/', (c) => {
   const profile = c.get('spotifyProfile')
 
   return c.json({
-    message: 'Hello Hono!',
+    message: 'Authenticated',
     profile,
   })
 })
@@ -41,7 +41,7 @@ app.post('/store', async (c) => {
     .lTrim(key, 0, 4)
     .exec()
 
-  return c.json({ message: 'success' })
+  return c.json({ message: 'success' }, 201)
 })
 
 app.get('/store', async (c) => {
@@ -90,7 +90,11 @@ app.patch('/store', async (c) => {
   const raw = await redis.lRange(key, 0, -1)
   const filtered = raw.filter((item) => (JSON.parse(item) as Track).id !== id)
 
-  await redis.multi().del(key).rPush(key, filtered).exec()
+  if (!filtered.length) {
+    await redis.del(key)
+  } else {
+    await redis.multi().del(key).rPush(key, filtered).exec()
+  }
 
   return c.json({ message: 'success' })
 })
