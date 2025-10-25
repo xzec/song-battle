@@ -28,7 +28,6 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
     "@eslint/js": "^9.36.0",
-    "@iconify-icon/react": "^3.0.1",
     "@repo/tsconfig": "workspace:*",
     "@repo/vite-plugin-validate-env": "workspace:*",
     "@types/node": "^24.6.0",

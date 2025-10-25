@@ -92,5 +92,6 @@ export const BattleProvider = ({ children }: { children: React.ReactNode }) => {
     registerBracketRect,
     edges,
   }
+
   return <BattleContext value={value}>{children}</BattleContext>
 }

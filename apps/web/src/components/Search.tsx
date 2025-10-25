@@ -1,9 +1,9 @@
-import { Icon } from '@iconify-icon/react'
 import * as Popover from '@radix-ui/react-popover'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   startTransition,
+  useId,
   useRef,
   useState,
   unstable_ViewTransition as ViewTransition,
@@ -15,6 +15,9 @@ import { useSpotifyAuth, useUser } from '~/auth/SpotifyAuthContext'
 import { SearchItem } from '~/components/SearchItem'
 import { useBattle } from '~/context/BattleContext'
 import type { Track } from '~/context/types'
+import { MagnifyingGlass } from '~/icons/MagnifyingGlass'
+import { Icon } from '~/icons/misc/Icon'
+import { X } from '~/icons/X'
 import { cn } from '~/utils/cn'
 
 export const Search = () => {
@@ -31,6 +34,7 @@ export const Search = () => {
   const user = useUser()
   const queryClient = useQueryClient()
   const avatarUrl = user.images[0].url
+  const searchId = useId()
 
   const { data: tracks } = useQuery({
     queryKey: ['search', deferredQuery],
@@ -100,15 +104,16 @@ export const Search = () => {
             searchRef.current?.focus()
           }}
         >
-          <Icon
-            aria-hidden="true"
-            title="Search"
-            icon="radix-icons:magnifying-glass"
-            width={32}
-            height={32}
-            className="text-white/50"
-          />
+          <label htmlFor={searchId}>
+            <Icon
+              icon={MagnifyingGlass}
+              title="Search Spotify"
+              size={32}
+              className="text-white/50"
+            />
+          </label>
           <input
+            id={searchId}
             type="search"
             ref={searchRef}
             placeholder="Search Spotify"
@@ -126,18 +131,17 @@ export const Search = () => {
               )}
               onClick={() => setQuery('')}
             >
-              <Icon icon="ic:baseline-clear" width={20} height={20} inline />
+              <Icon icon={X} aria-hidden size={20} />
             </button>
           ) : (
-            <span
+            <kbd
               className={cn(
-                'rounded-md border border-white/30 px-1 py-0.5 font-bold font-mono text-white/30 text-xs transition-opacity',
+                'rounded-md border border-white/30 px-1 font-bold font-sans text-sm text-white/30 leading-[20px] transition-opacity',
                 shadowOpen ? 'opacity-0' : 'opacity-100',
               )}
             >
-              <Icon inline icon="bx:command" className="mr-0.5" />
-              <kbd>K</kbd>
-            </span>
+              ⌘K
+            </kbd>
           )}
           <button
             type="button"
@@ -182,36 +186,44 @@ export const Search = () => {
           )}
         >
           {activeMenu === 'search' ? (
-            query.length && tracks ? (
-              tracks?.tracks.items.map((track) => (
-                <SearchItem
-                  key={track.id}
-                  onPick={closeMenu}
-                  track={{
-                    id: track.id,
-                    name: track.name,
-                    artist: track.artists.map((v) => v.name).join(', '),
-                    image: track.album.images.at(-2)?.url,
-                    imagePreview: track.album.images.at(-1)?.url,
-                  }}
-                />
-              ))
-            ) : (
-              <>
-                <span className="my-1 ml-2 block text-sm text-white/30">
-                  Recent
-                </span>
-                <div className="mx-2 mb-2 h-[0.5px] bg-white/10" />
-                {storedTracks?.map((track, i) => (
-                  <SearchItem
-                    key={i}
-                    onPick={closeMenu}
-                    track={track}
-                    onRemove={() => mutation.mutate(track.id)}
-                  />
-                ))}
-              </>
-            )
+            <output htmlFor={searchId}>
+              {query.length && tracks ? (
+                <ul>
+                  {tracks?.tracks.items.map((track) => (
+                    <li key={track.id}>
+                      <SearchItem
+                        onPick={closeMenu}
+                        track={{
+                          id: track.id,
+                          name: track.name,
+                          artist: track.artists.map((v) => v.name).join(', '),
+                          image: track.album.images.at(-2)?.url,
+                          imagePreview: track.album.images.at(-1)?.url,
+                        }}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <>
+                  <h2 className="my-1 ml-2 block text-sm text-white/30">
+                    Recent
+                  </h2>
+                  <div className="mx-2 mb-2 h-[0.5px] bg-white/10" />
+                  <ul>
+                    {storedTracks?.map((track) => (
+                      <li key={track.id}>
+                        <SearchItem
+                          onPick={closeMenu}
+                          track={track}
+                          onRemove={() => mutation.mutate(track.id)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+            </output>
           ) : (
             <button
               onClick={logout}

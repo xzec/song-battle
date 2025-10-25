@@ -20,6 +20,13 @@ export default defineConfig([
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
     },
+    settings: {
+      'jsx-a11y': {
+        attributes: {
+          for: ['htmlFor', 'for'],
+        },
+      },
+    },
     languageOptions: {
       ...jsxA11y.flatConfigs.recommended.languageOptions,
       ecmaVersion: 2022,
