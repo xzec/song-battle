@@ -114,8 +114,11 @@ export const Search = () => {
           </label>
           <input
             id={searchId}
-            type="search"
             ref={searchRef}
+            type="search"
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck="false"
             placeholder="Search Spotify"
             value={query}
             onFocus={() => openMenu('search')}
