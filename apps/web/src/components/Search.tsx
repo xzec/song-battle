@@ -1,13 +1,7 @@
 import * as Popover from '@radix-ui/react-popover'
 import { useDebouncedValue } from '@tanstack/react-pacer'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  startTransition,
-  useId,
-  useRef,
-  useState,
-  unstable_ViewTransition as ViewTransition,
-} from 'react'
+import { startTransition, useId, useRef, useState, ViewTransition } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { deleteStoredSong, getStoredSongs } from '~/api/backend'
 import { hitSearch } from '~/api/spotify'
