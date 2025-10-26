@@ -112,7 +112,7 @@ function Track({ track }: { track: Track }) {
   return (
     <>
       <Thumbnail src={track.image} alt={track.name} size={80}>
-        <NoImage className="aspect-square h-full" />
+        <NoImage className="aspect-square h-full" size={40} />
       </Thumbnail>
       <div className="flex h-full flex-col p-2">
         <span>{track.name}</span>

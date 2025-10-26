@@ -2,6 +2,7 @@ import { type ComponentProps, useState } from 'react'
 import { Icon } from '~/icons/misc/Icon'
 import { Waveform } from '~/icons/Waveform'
 import { cn } from '~/utils/cn'
+import { removeEmpty } from '~/utils/removeEmpty'
 
 type Props = React.ComponentProps<'img'> & {
   size?: string | number
@@ -30,7 +31,7 @@ export function Thumbnail({
         loading="eager"
         aria-hidden
         className={cn(
-          'loaded:block hidden select-none object-cover',
+          'hidden select-none object-cover',
           loaded && 'block',
           className,
         )}
@@ -43,22 +44,37 @@ export function Thumbnail({
   )
 }
 
-type NoImageProps = React.ComponentProps<'div'> & {
-  iconProps?: ComponentProps<typeof Icon>
-}
+type NoImageProps = React.ComponentProps<'div'> &
+  Pick<
+    ComponentProps<typeof Icon>,
+    'title' | 'desc' | 'inline' | 'size' | 'width' | 'height'
+  >
 
-export function NoImage({ iconProps, className, ...props }: NoImageProps) {
+export function NoImage({
+  title,
+  desc,
+  inline,
+  size,
+  width,
+  height,
+  className,
+  ...props
+}: NoImageProps) {
+  const iconProps = removeEmpty({
+    title,
+    desc,
+    inline,
+    size,
+    width,
+    height,
+  })
+
   return (
     <div
       className={cn('flex items-center justify-center', className)}
       {...props}
     >
-      <Icon
-        icon={Waveform}
-        viewBox="-128 -128 512 512"
-        aria-hidden
-        {...iconProps}
-      />
+      <Icon icon={Waveform} aria-hidden {...iconProps} />
     </div>
   )
 }

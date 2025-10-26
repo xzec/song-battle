@@ -38,7 +38,7 @@ export function SearchItem({ track, onPick, onRemove }: SearchItemsProps) {
           )
         }
       }}
-      className="focus-visible:emerald-ring flex w-full cursor-pointer items-center gap-3 rounded-xl p-2 text-left text-sm transition hover:bg-white/10 focus-visible:bg-white/10"
+      className="focus-visible:emerald-ring relative flex w-full cursor-pointer items-center gap-3 rounded-xl p-2 text-left text-sm transition hover:bg-white/10 focus-visible:bg-white/10"
     >
       <Thumbnail
         ref={imgRef}
