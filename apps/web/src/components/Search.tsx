@@ -14,7 +14,7 @@ import { Icon } from '~/icons/misc/Icon'
 import { X } from '~/icons/X'
 import { cn } from '~/utils/cn'
 
-export const Search = () => {
+export function Search() {
   const { logout, tokens } = useSpotifyAuth()
   const { setActiveBracketId, searchRef } = useBattle()
   const [query, setQuery] = useState('')

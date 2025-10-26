@@ -92,14 +92,14 @@ export function Bracket({
 
     if (interactive) {
       if (isDragOver)
-        return <span className="text-green-500">Release to add</span>
+        return <Info className="text-green-500">Release to add</Info>
       if (isActive)
-        return <span className="text-blue-500">Choose from search</span>
+        return <Info className="text-blue-500">Choose from search</Info>
       return (
-        <>
-          <span>Add track</span>
+        <Info>
+          Add track
           <Icon icon={Add} className="ml-1" size="1em" inline aria-hidden />
-        </>
+        </Info>
       )
     }
 
@@ -119,5 +119,13 @@ function Track({ track }: { track: Track }) {
         <span className="text-white/50">{track.artist}</span>
       </div>
     </>
+  )
+}
+
+function Info({ children, className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div className={cn('flex w-full justify-center', className)} {...props}>
+      <p>{children}</p>
+    </div>
   )
 }

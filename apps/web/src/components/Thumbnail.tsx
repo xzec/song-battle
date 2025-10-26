@@ -1,4 +1,9 @@
-import { type ComponentProps, useState } from 'react'
+import {
+  type ComponentProps,
+  cloneElement,
+  isValidElement,
+  useState,
+} from 'react'
 import { Icon } from '~/icons/misc/Icon'
 import { Waveform } from '~/icons/Waveform'
 import { cn } from '~/utils/cn'
@@ -10,6 +15,7 @@ type Props = React.ComponentProps<'img'> & {
 
 export function Thumbnail({
   src,
+  ref,
   alt,
   className,
   size,
@@ -20,12 +26,13 @@ export function Thumbnail({
 }: Props) {
   const [loaded, setLoaded] = useState(false)
 
-  if (!src) return children
+  if (!src) return <PassThrough ref={ref}>{children}</PassThrough>
 
   return (
     <>
       <img
         src={src}
+        ref={ref}
         alt={alt}
         onLoad={() => setLoaded(true)}
         loading="eager"
@@ -77,4 +84,11 @@ export function NoImage({
       <Icon icon={Waveform} aria-hidden {...iconProps} />
     </div>
   )
+}
+
+function PassThrough({ children, ...props }: React.ComponentProps<'div'>) {
+  if (isValidElement(children)) {
+    return cloneElement(children, props)
+  }
+  return <>{children}</>
 }
