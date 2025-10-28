@@ -1,6 +1,8 @@
+import type { Track } from '~/context/types'
+
 const searchUrl = 'https://api.spotify.com/v1/search'
 
-export async function hitSearch(
+export async function searchTracks(
   query: string,
   accessToken: string,
   country: string,
@@ -26,11 +28,18 @@ export async function hitSearch(
     throw new Error(error.error.message, { cause: error })
   }
 
-  const data = await res.json()
-  return data as SpotifyTrackSearchResponse
+  const data = (await res.json()) as SpotifyTrackSearchResponse
+
+  return data.tracks.items.map<Track>((track) => ({
+    id: track.id,
+    name: track.name,
+    artist: track.artists.map((v) => v.name).join(', '),
+    image: track.album.images.at(-2)?.url,
+    imagePreview: track.album.images.at(-1)?.url,
+  }))
 }
 
-type SpotifyTrackSearchResponse = {
+export interface SpotifyTrackSearchResponse {
   tracks: {
     items: Array<{
       id: string
@@ -47,7 +56,7 @@ type SpotifyTrackSearchResponse = {
   }
 }
 
-type SpotifyTrackSearchError = {
+interface SpotifyTrackSearchError {
   error: {
     status: number
     message: string

@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { startTransition, useId, useRef, useState, ViewTransition } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { deleteStoredSong, getStoredSongs } from '~/api/backend'
-import { hitSearch } from '~/api/spotify'
+import { searchTracks } from '~/api/spotify'
 import { useSpotifyAuth, useUser } from '~/auth/SpotifyAuthContext'
 import { SearchItem } from '~/components/SearchItem'
 import { useBattle } from '~/context/BattleContext'
@@ -32,18 +32,19 @@ export function Search() {
 
   const { data: tracks } = useQuery({
     queryKey: ['search', deferredQuery],
-    queryFn: () => hitSearch(deferredQuery, tokens!.accessToken, user.country),
+    queryFn: () =>
+      searchTracks(deferredQuery, tokens!.accessToken, user.country),
     enabled: Boolean(tokens?.accessToken && deferredQuery.length),
     placeholderData: (previousData) => previousData,
   })
 
-  const { data: storedTracks, refetch: refetchStoredTracks } = useQuery({
+  const { data: recentTracks, refetch: refetchRecentTracks } = useQuery({
     queryKey: ['history'],
     queryFn: () => getStoredSongs(tokens!.accessToken),
     enabled: Boolean(tokens?.accessToken && !query.length),
   })
 
-  const mutation = useMutation({
+  const removeFromRecent = useMutation({
     mutationFn: async (trackId: string) => {
       await deleteStoredSong(trackId, tokens!.accessToken)
     },
@@ -60,7 +61,7 @@ export function Search() {
       if (context?.previousHistory)
         queryClient.setQueryData(['history'], context.previousHistory)
     },
-    onSuccess: () => void refetchStoredTracks(),
+    onSuccess: () => void refetchRecentTracks(),
   })
 
   const openMenu = (type: 'search' | 'avatar') => {
@@ -174,7 +175,7 @@ export function Search() {
           onOpenAutoFocus={(event) => event.preventDefault()}
           onCloseAutoFocus={(event) => event.preventDefault()}
           className={cn(
-            'scrollbar-none pointer-events-auto relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950/80 p-3 text-white shadow-lg backdrop-blur-lg',
+            'scrollbar-none pointer-events-auto relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950 p-3 text-white shadow-lg',
             {
               'max-h-80 w-[calc(100vw-16px)] max-w-xl overflow-y-auto':
                 activeMenu === 'search',
@@ -184,40 +185,19 @@ export function Search() {
         >
           {activeMenu === 'search' ? (
             <output htmlFor={searchId}>
-              {query.length && tracks ? (
-                <ul>
-                  {tracks?.tracks.items.map((track) => (
-                    <li key={track.id}>
-                      <SearchItem
-                        onPick={closeMenu}
-                        track={{
-                          id: track.id,
-                          name: track.name,
-                          artist: track.artists.map((v) => v.name).join(', '),
-                          image: track.album.images.at(-2)?.url,
-                          imagePreview: track.album.images.at(-1)?.url,
-                        }}
-                      />
-                    </li>
-                  ))}
-                </ul>
+              {query.length ? (
+                <ListOfTracks tracks={tracks} onPick={closeMenu} />
               ) : (
                 <>
-                  <h2 className="my-1 ml-2 block text-sm text-white/30">
+                  <h2 className="my-1 ml-2 block text-sm text-white/40">
                     Recent
                   </h2>
                   <div className="mx-2 mb-2 h-[0.5px] bg-white/10" />
-                  <ul>
-                    {storedTracks?.map((track) => (
-                      <li key={track.id}>
-                        <SearchItem
-                          onPick={closeMenu}
-                          track={track}
-                          onRemove={() => mutation.mutate(track.id)}
-                        />
-                      </li>
-                    ))}
-                  </ul>
+                  <ListOfTracks
+                    tracks={recentTracks}
+                    onPick={closeMenu}
+                    onRemove={removeFromRecent.mutate}
+                  />
                 </>
               )}
             </output>
@@ -232,5 +212,35 @@ export function Search() {
         </Popover.Content>
       </ViewTransition>
     </Popover.Root>
+  )
+}
+
+function ListOfTracks({
+  tracks,
+  onPick,
+  onRemove,
+}: {
+  tracks: Track[] | undefined
+  onPick: () => void
+  onRemove?: (trackId: string) => void
+}) {
+  if (!tracks?.length) return 'No results'
+
+  return (
+    <ul>
+      {tracks?.map((track) => (
+        <li key={track.id}>
+          <SearchItem
+            onPick={onPick}
+            track={track}
+            onRemove={
+              typeof onRemove === 'function'
+                ? () => onRemove(track.id)
+                : undefined
+            }
+          />
+        </li>
+      ))}
+    </ul>
   )
 }
