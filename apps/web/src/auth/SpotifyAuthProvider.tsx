@@ -10,7 +10,6 @@ import {
   handleSpotifyCallback,
   refreshAccessToken,
   storeTokens,
-  tokenExpiryBuffer,
   tokensAreExpired,
 } from '~/auth/spotify'
 import type {
@@ -18,6 +17,7 @@ import type {
   SpotifyUserProfile,
   StoredSpotifyTokens,
 } from '~/auth/types'
+import { useBackgroundTokenRefresh } from '~/auth/useBackgroundTokenRefresh'
 
 const callbackPathname = new URL(import.meta.env.VITE_SPOTIFY_REDIRECT_URI)
   .pathname
@@ -69,17 +69,26 @@ export const SpotifyAuthProvider = ({
   )
 
   const refreshTokens = useCallback(async () => {
-    if (!tokens?.refreshToken) {
-      console.error('No refresh token available')
+    const stored = getStoredTokens()
+    if (!stored?.refreshToken) {
+      handleUnauthenticated()
       return
     }
 
-    if (tokensAreExpired(tokens)) {
-      const newTokens = await refreshAccessToken(tokens.refreshToken)
-      const stored = convertToStoredTokens(newTokens)
-      void applyTokens(stored)
+    let nextTokens: StoredSpotifyTokens
+    try {
+      const refreshed = await refreshAccessToken(stored.refreshToken)
+      nextTokens = convertToStoredTokens({
+        ...refreshed,
+        refresh_token: refreshed.refresh_token ?? stored.refreshToken,
+      })
+    } catch (refreshError) {
+      handleError(AuthError.from(refreshError, 'refresh_failed'))
+      return
     }
-  }, [applyTokens, tokens])
+
+    await applyTokens(nextTokens)
+  }, [applyTokens, handleError, handleUnauthenticated])
 
   useEffect(
     function authenticate() {
@@ -107,52 +116,20 @@ export const SpotifyAuthProvider = ({
           return
         }
 
-        if (tokensAreExpired(stored)) {
-          if (!stored.refreshToken) {
-            handleUnauthenticated()
-            return
-          }
-
-          setStatus('authenticating')
-          let tokens: StoredSpotifyTokens
-          try {
-            const refreshed = await refreshAccessToken(stored.refreshToken)
-            tokens = convertToStoredTokens({
-              ...refreshed,
-              refresh_token: refreshed.refresh_token ?? stored.refreshToken,
-            })
-          } catch (refreshError) {
-            handleError(AuthError.from(refreshError, 'refresh_failed'))
-            return
-          }
-          await applyTokens(tokens)
-          return
-        }
-
         setStatus('authenticating')
-        await applyTokens(stored)
+        if (tokensAreExpired(stored)) {
+          await refreshTokens()
+        } else {
+          await applyTokens(stored)
+        }
       }
 
       void initialize()
     },
-    [handleError, handleUnauthenticated, applyTokens],
+    [handleError, handleUnauthenticated, applyTokens, refreshTokens],
   )
 
-  useEffect(
-    function refreshTokenTimer() {
-      if (!tokens) return
-
-      const timeoutId = setTimeout(
-        () => void refreshTokens(),
-        tokens.expiresAt - Date.now() - tokenExpiryBuffer,
-      )
-
-      return () => {
-        if (timeoutId !== undefined) clearTimeout(timeoutId)
-      }
-    },
-    [refreshTokens, tokens],
-  )
+  useBackgroundTokenRefresh(tokens, refreshTokens)
 
   const login = useCallback(() => {
     setStatus('authenticating')

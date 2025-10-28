@@ -17,13 +17,13 @@ export async function hitSearch(
 
   const res = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}a`,
     },
   })
 
   if (!res.ok) {
-    const parsed = (await res.json()) as SpotifyTrackSearchError
-    console.error(parsed)
+    const error = (await res.json()) as SpotifyTrackSearchError
+    throw new Error(error.error.message, { cause: error })
   }
 
   const data = await res.json()
