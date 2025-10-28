@@ -132,14 +132,24 @@ export function Search() {
               <Icon icon={X} aria-hidden size={20} />
             </button>
           ) : (
-            <kbd
-              className={cn(
-                'rounded-md border border-white/30 px-1 font-bold font-sans text-sm text-white/30 leading-[20px] transition-opacity',
-                shadowOpen ? 'opacity-0' : 'opacity-100',
-              )}
-            >
-              ⌘K
-            </kbd>
+            <>
+              <kbd
+                className={cn(
+                  'win:hidden rounded-md border border-white/30 px-1 font-bold font-sans text-white/30 text-xs leading-[20px] tracking-wide transition-opacity',
+                  shadowOpen ? 'opacity-0' : 'opacity-100',
+                )}
+              >
+                ⌘K
+              </kbd>
+              <kbd
+                className={cn(
+                  'mac:hidden rounded-md border border-white/30 px-1 font-bold font-sans text-white/30 text-xs leading-[20px] tracking-tight transition-opacity',
+                  shadowOpen ? 'opacity-0' : 'opacity-100',
+                )}
+              >
+                Ctrl K
+              </kbd>
+            </>
           )}
           <button
             type="button"
