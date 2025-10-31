@@ -8,8 +8,10 @@ export function useBackgroundTokenRefresh(
 ) {
   // event refresh
   useEffect(() => {
+    if (!tokens) return
+
     async function refreshIfExpired() {
-      if (tokens && tokensAreExpired(tokens)) await refreshTokens()
+      if (tokensAreExpired(tokens!)) await refreshTokens()
     }
 
     window.addEventListener('online', refreshIfExpired)

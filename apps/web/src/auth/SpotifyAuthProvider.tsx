@@ -83,7 +83,10 @@ export const SpotifyAuthProvider = ({
         refresh_token: refreshed.refresh_token ?? stored.refreshToken,
       })
     } catch (refreshError) {
-      handleError(AuthError.from(refreshError, 'refresh_failed'))
+      const error = AuthError.from(refreshError)
+      // ignore network errors when offline, `useBackgroundTokenRefresh` will attempt to refresh when back online
+      if (error.type === 'network_error' && !navigator.onLine) return
+      handleError(error)
       return
     }
 
