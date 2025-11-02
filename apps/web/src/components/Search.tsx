@@ -239,6 +239,7 @@ export function Search() {
             </output>
           ) : (
             <button
+              type="button"
               onClick={logout}
               className="w-full rounded-xl px-4 py-2 text-left text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
             >

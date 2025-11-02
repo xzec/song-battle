@@ -24,6 +24,7 @@ export const AuthScreen = () => {
           </div>
         )}
         <button
+          type="button"
           onClick={login}
           className="focus-visible:emerald-ring mt-8 flex w-full items-center justify-center gap-3 rounded-full bg-green-400 px-6 py-3 font-medium text-base text-black transition hover:bg-green-500 focus-visible:ring-white"
         >

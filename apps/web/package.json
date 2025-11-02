@@ -10,7 +10,7 @@
     "preview": "pnpm build && vite preview",
     "lint": "eslint .",
     "typecheck": "tsc -p tsconfig.app.json",
-    "format:check": "biome check ."
+    "biome:check:staged": "biome check . --staged"
   },
   "dependencies": {
     "@radix-ui/react-popover": "1.1.15",
@@ -24,7 +24,7 @@
     "tailwindcss": "4.1.13"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.4",
+    "@biomejs/biome": "2.3.2",
     "@eslint/js": "9.36.0",
     "@repo/tsconfig": "workspace:*",
     "@repo/vite-plugin-validate-env": "workspace:*",

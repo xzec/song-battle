@@ -8,4 +8,4 @@ pre-commit:
       run: pnpm --filter @repo/web lint
 
     - name: biome
-      run: pnpm --filter @repo/web format:check
+      run: pnpm --filter @repo/web biome:check:staged
