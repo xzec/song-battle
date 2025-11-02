@@ -6,13 +6,19 @@ import { Icon } from '~/icons/misc/Icon'
 import { X } from '~/icons/X'
 import { cn } from '~/utils/cn'
 
-type SearchItemsProps = {
+type SearchItemsProps = React.ComponentProps<'button'> & {
   track: Track
   onPick: () => void
   onRemove?: () => void
 }
 
-export function SearchItem({ track, onPick, onRemove }: SearchItemsProps) {
+export function SearchItem({
+  track,
+  onPick,
+  onRemove,
+  className,
+  ...props
+}: SearchItemsProps) {
   const { addTrackToFirstAvailableBracket } = useBattle()
   const imgRef = useRef<HTMLImageElement>(null)
 
@@ -38,7 +44,11 @@ export function SearchItem({ track, onPick, onRemove }: SearchItemsProps) {
           )
         }
       }}
-      className="focus-visible:emerald-ring relative flex w-full cursor-pointer items-center gap-3 rounded-xl p-2 text-left text-sm transition hover:bg-white/10 focus-visible:bg-white/10"
+      className={cn(
+        'focus-visible:emerald-ring relative flex w-full cursor-pointer items-center gap-3 rounded-xl bg-clip-padding p-2 text-left text-sm transition hover:bg-white/10 focus-visible:bg-white/10',
+        className,
+      )}
+      {...props}
     >
       <Thumbnail
         ref={imgRef}

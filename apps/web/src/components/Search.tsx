@@ -34,11 +34,13 @@ export function Search() {
   const [shadowOpen, setShadowOpen] = useState(false)
   const [activeMenu, setActiveMenu] = useState<'search' | 'avatar' | null>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
+  const avatarButtonRef = useRef<HTMLButtonElement>(null)
   const user = useUser()
   const queryClient = useQueryClient()
   const avatarUrl = user.images[0].url
   const searchId = useId()
   const [tracksLoaded, setTracksLoaded] = useState(false)
+  const tracksRef = useRef<(HTMLButtonElement | null)[]>([])
 
   const { data: tracks, isFetching: tracksFetching } = useQuery({
     queryKey: ['search', query],
@@ -110,7 +112,7 @@ export function Search() {
         <search
           ref={searchBarRef}
           className={cn(
-            'pointer-events-auto flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white transition',
+            'pointer-events-auto flex flex-1 cursor-pointer items-center gap-3 rounded-full py-1 pr-1 pl-4 text-white',
             'group-focus-within:emerald-ring border border-white/30 hover:not-focus-within:not-active:border-white/50 group-focus-within:border-transparent',
             'bg-zinc-950/30 backdrop-blur-lg group-focus-within:bg-zinc-950/80',
             'inset-shadow-sm inset-shadow-zinc-900/25 shadow-sm shadow-zinc-900/25',
@@ -139,6 +141,12 @@ export function Search() {
             value={query}
             onFocus={() => openMenu('search')}
             onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowDown') {
+                event.preventDefault()
+                tracksRef.current[0]?.focus()
+              }
+            }}
             className="flex-1 not-focus-visible:cursor-pointer bg-transparent font-medium text-lg text-white placeholder:text-white/50 focus:outline-none"
           />
           {query.length ? (
@@ -173,15 +181,21 @@ export function Search() {
             </>
           )}
           <button
+            ref={avatarButtonRef}
             type="button"
             className={cn(
-              'flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border bg-white/10 font-medium text-sm text-white/80 transition hover:text-white focus-visible:ring-0',
-              'border-white/10 hover:border-white/30 focus-visible:border-white/80',
+              'flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-white/10 font-medium text-sm text-white/80 transition-shadow hover:text-white',
+              'border border-white/10 ring-white hover:border-white/30 focus-visible:border-none',
             )}
             aria-label="Open account menu"
             onClick={(event) => {
               event.stopPropagation()
               openMenu('avatar')
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'ArrowDown') {
+                openMenu('avatar')
+              }
             }}
           >
             <img
@@ -221,6 +235,7 @@ export function Search() {
                   tracks={tracks}
                   onPick={closeMenu}
                   noData="No results"
+                  tracksRef={tracksRef}
                 />
               ) : (
                 <>
@@ -233,6 +248,7 @@ export function Search() {
                     onPick={closeMenu}
                     onRemove={removeFromRecent.mutate}
                     noData="No recent tracks"
+                    tracksRef={tracksRef}
                   />
                 </>
               )}
@@ -257,23 +273,39 @@ function ListOfTracks({
   onPick,
   onRemove,
   noData,
+  tracksRef,
 }: {
   tracks: Track[] | undefined
   onPick: () => void
   onRemove?: (trackId: string) => void
   noData?: string
+  tracksRef: React.RefObject<(HTMLButtonElement | null)[]>
 }) {
   if (!tracks?.length)
     return <p className="my-2 text-center text-white">{noData}</p>
 
+  const handleTrackKeyDown = (element: React.KeyboardEvent, index: number) => {
+    console.log(element.key)
+    if (element.key === 'ArrowDown' || element.key === 'ArrowUp') {
+      element.preventDefault()
+      const step = element.key === 'ArrowDown' ? 1 : -1
+      const next = (index + step) % tracksRef.current.length
+      tracksRef.current.at(next)?.focus()
+    }
+  }
+
   return (
     <ul>
-      {tracks?.map((track) => (
+      {tracks?.map((track, i) => (
         <li key={track.id}>
           <SearchItem
             onPick={onPick}
             track={track}
             onRemove={onRemove ? () => onRemove(track.id) : undefined}
+            ref={(element) => {
+              tracksRef.current[i] = element
+            }}
+            onKeyDown={(event) => handleTrackKeyDown(event, i)}
           />
         </li>
       ))}
