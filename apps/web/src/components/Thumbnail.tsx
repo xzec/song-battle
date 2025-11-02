@@ -7,7 +7,7 @@ import {
 import { Icon } from '~/icons/misc/Icon'
 import { Waveform } from '~/icons/Waveform'
 import { cn } from '~/utils/cn'
-import { removeEmpty } from '~/utils/removeEmpty'
+import { removeEmpty } from '~/utils/remove-empty'
 
 type Props = React.ComponentProps<'img'> & {
   size?: string | number
