@@ -5,13 +5,13 @@
 }
 
 @custom-variant mac {
-  &:where(html.platform-mac *) {
+  &:where(:root.platform-mac *) {
     @slot;
   }
 }
 
 @custom-variant win {
-  &:where(html.platform-win *) {
+  &:where(:root.platform-win *) {
     @slot;
   }
 }
@@ -26,13 +26,10 @@
   -moz-osx-font-smoothing: grayscale;
   background-color: #030712;
   color: #f8fafc;
+  overscroll-behavior: none;
 }
 
 @layer base {
-  html {
-    overscroll-behavior: none;
-  }
-
   body {
     margin: 0;
     min-height: 100vh;
