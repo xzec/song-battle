@@ -1,7 +1,18 @@
 import * as Popover from '@radix-ui/react-popover'
-import { useDebouncedValue } from '@tanstack/react-pacer'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { startTransition, useId, useRef, useState, ViewTransition } from 'react'
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
+import {
+  startTransition,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  ViewTransition,
+} from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { deleteStoredSong, getStoredSongs } from '~/api/backend'
 import { searchTracks } from '~/api/spotify'
@@ -13,14 +24,12 @@ import { MagnifyingGlass } from '~/icons/MagnifyingGlass'
 import { Icon } from '~/icons/misc/Icon'
 import { X } from '~/icons/X'
 import { cn } from '~/utils/cn'
+import { debounce } from '~/utils/debounce'
 
 export function Search() {
   const { logout, tokens } = useSpotifyAuth()
   const { setActiveBracketId, searchRef } = useBattle()
   const [query, setQuery] = useState('')
-  const [deferredQuery] = useDebouncedValue(query, {
-    wait: 175,
-  })
   const [open, setOpen] = useState(false)
   const [shadowOpen, setShadowOpen] = useState(false)
   const [activeMenu, setActiveMenu] = useState<'search' | 'avatar' | null>(null)
@@ -29,18 +38,30 @@ export function Search() {
   const queryClient = useQueryClient()
   const avatarUrl = user.images[0].url
   const searchId = useId()
+  const [tracksLoaded, setTracksLoaded] = useState(false)
 
-  const { data: tracks } = useQuery({
-    queryKey: ['search', deferredQuery],
-    queryFn: () =>
-      searchTracks(deferredQuery, tokens!.accessToken, user.country),
-    enabled: Boolean(tokens?.accessToken && deferredQuery.length),
-    placeholderData: (previousData) => previousData,
+  const { data: tracks, isFetching: tracksFetching } = useQuery({
+    queryKey: ['search', query],
+    queryFn: ({ signal }) =>
+      debounce(
+        () => searchTracks(query, tokens!.accessToken, user.country, signal),
+        175,
+      ),
+    enabled: Boolean(tokens?.accessToken && query.length),
+    placeholderData: keepPreviousData,
+    staleTime: 1000 * 60 * 5,
   })
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Reason: "sticky until cleared" behavior
+    setTracksLoaded((prev) =>
+      !query.length ? false : !tracksFetching ? true : prev,
+    )
+  }, [query, tracksFetching])
 
   const { data: recentTracks, refetch: refetchRecentTracks } = useQuery({
     queryKey: ['history'],
-    queryFn: () => getStoredSongs(tokens!.accessToken),
+    queryFn: ({ signal }) => getStoredSongs(tokens!.accessToken, signal),
     enabled: Boolean(tokens?.accessToken && !query.length),
   })
 
@@ -195,8 +216,12 @@ export function Search() {
         >
           {activeMenu === 'search' ? (
             <output htmlFor={searchId}>
-              {query.length ? (
-                <ListOfTracks tracks={tracks} onPick={closeMenu} />
+              {tracksLoaded ? (
+                <ListOfTracks
+                  tracks={tracks}
+                  onPick={closeMenu}
+                  noData="No results"
+                />
               ) : (
                 <>
                   <h2 className="my-1 ml-2 block text-sm text-white/40">
@@ -207,6 +232,7 @@ export function Search() {
                     tracks={recentTracks}
                     onPick={closeMenu}
                     onRemove={removeFromRecent.mutate}
+                    noData="No recent tracks"
                   />
                 </>
               )}
@@ -229,12 +255,15 @@ function ListOfTracks({
   tracks,
   onPick,
   onRemove,
+  noData,
 }: {
   tracks: Track[] | undefined
   onPick: () => void
   onRemove?: (trackId: string) => void
+  noData?: string
 }) {
-  if (!tracks?.length) return 'No results'
+  if (!tracks?.length)
+    return <p className="my-2 text-center text-white">{noData}</p>
 
   return (
     <ul>
@@ -243,11 +272,7 @@ function ListOfTracks({
           <SearchItem
             onPick={onPick}
             track={track}
-            onRemove={
-              typeof onRemove === 'function'
-                ? () => onRemove(track.id)
-                : undefined
-            }
+            onRemove={onRemove ? () => onRemove(track.id) : undefined}
           />
         </li>
       ))}

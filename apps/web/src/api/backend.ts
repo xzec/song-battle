@@ -15,12 +15,16 @@ export async function storeSong(
   return res.json()
 }
 
-export async function getStoredSongs(accessToken: string) {
+export async function getStoredSongs(
+  accessToken: string,
+  signal?: AbortSignal,
+) {
   const res = await fetch(`${import.meta.env.VITE_API_URL}/store`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+    signal,
   })
   const parsed = (await res.json()) as { message: 'string'; items: Track[] }
   return parsed.items

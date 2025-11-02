@@ -6,7 +6,10 @@ export async function searchTracks(
   query: string,
   accessToken: string,
   country: string,
+  signal?: AbortSignal,
 ) {
+  if (!query || signal?.aborted) return []
+
   const params = {
     q: query,
     type: 'track',
@@ -19,8 +22,9 @@ export async function searchTracks(
 
   const res = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${accessToken}a`,
+      Authorization: `Bearer ${accessToken}`,
     },
+    signal,
   })
 
   if (!res.ok) {
@@ -39,7 +43,7 @@ export async function searchTracks(
   }))
 }
 
-export interface SpotifyTrackSearchResponse {
+interface SpotifyTrackSearchResponse {
   tracks: {
     items: Array<{
       id: string
