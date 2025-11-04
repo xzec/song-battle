@@ -1,7 +1,9 @@
-export async function debounce<T>(
-  fn: () => T | Promise<T>,
+export function debounce<TArgs extends any[], TReturn>(
+  fn: (...args: TArgs) => TReturn | Promise<TReturn>,
   wait: number,
-): Promise<T> {
-  await new Promise((resolve) => setTimeout(resolve, wait))
-  return fn()
+) {
+  return async function (...args: TArgs) {
+    await new Promise((resolve) => setTimeout(resolve, wait))
+    return fn(...args)
+  }
 }

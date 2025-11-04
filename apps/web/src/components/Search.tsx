@@ -26,6 +26,8 @@ import { X } from '~/icons/X'
 import { cn } from '~/utils/cn'
 import { debounce } from '~/utils/debounce'
 
+const searchTracksDebounced = debounce(searchTracks, 175)
+
 export function Search() {
   const { logout, tokens } = useSpotifyAuth()
   const { setActiveBracketId, searchRef } = useBattle()
@@ -45,13 +47,15 @@ export function Search() {
   const { data: tracks, isFetching: tracksFetching } = useQuery({
     queryKey: ['search', query],
     queryFn: ({ signal }) =>
-      debounce(
-        () => searchTracks(query, tokens!.accessToken, user.country, signal),
-        175,
-      ),
+      searchTracksDebounced(query, tokens!.accessToken, user.country, signal),
     enabled: Boolean(tokens?.accessToken && query.length),
     placeholderData: keepPreviousData,
-    staleTime: 1000 * 60 * 5,
+  })
+
+  const { data: recentTracks, refetch: refetchRecentTracks } = useQuery({
+    queryKey: ['history'],
+    queryFn: ({ signal }) => getStoredSongs(tokens!.accessToken, signal),
+    enabled: Boolean(tokens?.accessToken && !query.length),
   })
 
   useEffect(() => {
@@ -60,12 +64,6 @@ export function Search() {
       !query.length ? false : !tracksFetching ? true : prev,
     )
   }, [query, tracksFetching])
-
-  const { data: recentTracks, refetch: refetchRecentTracks } = useQuery({
-    queryKey: ['history'],
-    queryFn: ({ signal }) => getStoredSongs(tokens!.accessToken, signal),
-    enabled: Boolean(tokens?.accessToken && !query.length),
-  })
 
   const removeFromRecent = useMutation({
     mutationFn: async (trackId: string) => {
@@ -285,7 +283,6 @@ function ListOfTracks({
     return <p className="my-2 text-center text-white">{noData}</p>
 
   const handleTrackKeyDown = (element: React.KeyboardEvent, index: number) => {
-    console.log(element.key)
     if (element.key === 'ArrowDown' || element.key === 'ArrowUp') {
       element.preventDefault()
       const step = element.key === 'ArrowDown' ? 1 : -1
