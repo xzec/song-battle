@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AuthError } from '~/auth/AuthError'
 import { SpotifyAuthContext } from '~/auth/SpotifyAuthContext'
 import {
@@ -134,7 +134,7 @@ export const SpotifyAuthProvider = ({
 
   useBackgroundTokenRefresh(tokens, refreshTokens)
 
-  const login = useCallback(() => {
+  const login = () => {
     setStatus('authenticating')
     setUser(null)
     setError(null)
@@ -143,21 +143,18 @@ export const SpotifyAuthProvider = ({
       setStatus('error')
       setError(AuthError.from(authError))
     })
-  }, [])
+  }
 
   const logout = handleUnauthenticated
 
-  const value = useMemo(
-    () => ({
-      status,
-      user,
-      tokens,
-      error,
-      login,
-      logout,
-    }),
-    [status, user, tokens, error, login, logout],
-  )
+  const value = {
+    status,
+    user,
+    tokens,
+    error,
+    login,
+    logout,
+  }
 
   return <SpotifyAuthContext value={value}>{children}</SpotifyAuthContext>
 }
