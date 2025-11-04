@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 import { tokenExpiryBuffer, tokensAreExpired } from '~/auth/spotify'
 import type { StoredSpotifyTokens } from '~/auth/types'
 
@@ -6,13 +6,15 @@ export function useBackgroundTokenRefresh(
   tokens: StoredSpotifyTokens | null,
   refreshTokens: () => Promise<void>,
 ) {
+  const attemptRefresh = useEffectEvent(refreshTokens)
+
+  const refreshIfExpired = useEffectEvent(async () => {
+    if (tokensAreExpired(tokens!)) await refreshTokens()
+  })
+
   // event refresh
   useEffect(() => {
     if (!tokens) return
-
-    async function refreshIfExpired() {
-      if (tokensAreExpired(tokens!)) await refreshTokens()
-    }
 
     window.addEventListener('online', refreshIfExpired)
     window.addEventListener('focus', refreshIfExpired)
@@ -23,19 +25,19 @@ export function useBackgroundTokenRefresh(
       window.removeEventListener('focus', refreshIfExpired)
       document.removeEventListener('visibilitychange', refreshIfExpired)
     }
-  }, [refreshTokens, tokens])
+  }, [tokens])
 
   // timer refresh
   useEffect(() => {
     if (!tokens) return
 
     const timeoutId = setTimeout(
-      () => void refreshTokens(),
+      () => void attemptRefresh(),
       tokens.expiresAt - Date.now() - tokenExpiryBuffer,
     )
 
     return () => {
       if (timeoutId !== undefined) clearTimeout(timeoutId)
     }
-  }, [refreshTokens, tokens])
+  }, [tokens])
 }
