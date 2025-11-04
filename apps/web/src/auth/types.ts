@@ -42,7 +42,6 @@ export type PkceSession = {
 }
 
 export type AuthStatus =
-  | 'loading'
   | 'unauthenticated'
   | 'authenticating'
   | 'authenticated'

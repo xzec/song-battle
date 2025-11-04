@@ -11,7 +11,7 @@ const App = () => {
 
   let content: ReactNode
 
-  if (status === 'loading' || status === 'authenticating') {
+  if (status === 'authenticating') {
     content = <LoadingScreen />
   } else if (status === 'unauthenticated' || status === 'error') {
     content = <AuthScreen />
