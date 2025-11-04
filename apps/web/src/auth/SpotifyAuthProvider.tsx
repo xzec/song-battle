@@ -18,20 +18,19 @@ import type {
   StoredSpotifyTokens,
 } from '~/auth/types'
 import { useBackgroundTokenRefresh } from '~/auth/useBackgroundTokenRefresh'
+import { asyncRetry } from '~/utils/asyncRetry'
 
+const refreshAccessTokenWithRetry = asyncRetry(refreshAccessToken, 2)
 const callbackPathname = new URL(import.meta.env.VITE_SPOTIFY_REDIRECT_URI)
   .pathname
 
-export const SpotifyAuthProvider = ({
-  children,
-}: {
-  children: React.ReactNode
-}) => {
-  const [status, setStatus] = useState<AuthStatus>('loading')
+export const SpotifyAuthProvider = ({ children }: React.PropsWithChildren) => {
+  const [status, setStatus] = useState<AuthStatus>('authenticating')
   const [tokens, setTokens] = useState<StoredSpotifyTokens | null>(null)
   const [user, setUser] = useState<SpotifyUserProfile | null>(null)
   const [error, setError] = useState<AuthError | null>(null)
   const mountedRef = useRef(false)
+  const refreshTokenInProgress = useRef(false)
 
   const handleError = useCallback((error: AuthError) => {
     console.error(error)
@@ -69,18 +68,21 @@ export const SpotifyAuthProvider = ({
   )
 
   const refreshTokens = useCallback(async () => {
-    const stored = getStoredTokens()
-    if (!stored?.refreshToken) {
+    if (refreshTokenInProgress.current) return
+    refreshTokenInProgress.current = true
+
+    const refreshToken = getStoredTokens()?.refreshToken
+    if (!refreshToken) {
       handleUnauthenticated()
       return
     }
 
     let nextTokens: StoredSpotifyTokens
     try {
-      const refreshed = await refreshAccessToken(stored.refreshToken)
+      const refreshed = await refreshAccessTokenWithRetry(refreshToken)
       nextTokens = convertToStoredTokens({
         ...refreshed,
-        refresh_token: refreshed.refresh_token ?? stored.refreshToken,
+        refresh_token: refreshed.refresh_token ?? refreshToken,
       })
     } catch (refreshError) {
       const error = AuthError.from(refreshError)
@@ -88,6 +90,8 @@ export const SpotifyAuthProvider = ({
       if (error.type === 'network_error' && !navigator.onLine) return
       handleError(error)
       return
+    } finally {
+      refreshTokenInProgress.current = false
     }
 
     await applyTokens(nextTokens)
@@ -99,8 +103,8 @@ export const SpotifyAuthProvider = ({
       mountedRef.current = true
 
       async function initialize() {
+        setStatus('authenticating')
         if (location.pathname === callbackPathname) {
-          setStatus('authenticating')
           const searchParams = new URLSearchParams(location.search)
           try {
             const { tokens } = await handleSpotifyCallback(searchParams)
@@ -119,7 +123,6 @@ export const SpotifyAuthProvider = ({
           return
         }
 
-        setStatus('authenticating')
         if (tokensAreExpired(stored)) {
           await refreshTokens()
         } else {
