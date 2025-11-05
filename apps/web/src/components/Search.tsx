@@ -1,10 +1,5 @@
 import * as Popover from '@radix-ui/react-popover'
-import {
-  keepPreviousData,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   startTransition,
   useEffect,
@@ -43,27 +38,53 @@ export function Search() {
   const searchId = useId()
   const [tracksLoaded, setTracksLoaded] = useState(false)
   const tracksRef = useRef<(HTMLButtonElement | null)[]>([])
+  const [tracksErrorMessage, setTracksErrorMessage] = useState<string>()
 
-  const { data: tracks, isFetching: tracksFetching } = useQuery({
+  const {
+    data: tracks,
+    isFetching: tracksFetching,
+    isError: tracksIsError,
+  } = useQuery({
     queryKey: ['search', query],
     queryFn: ({ signal }) =>
       searchTracksDebounced(query, tokens!.accessToken, user.country, signal),
     enabled: Boolean(tokens?.accessToken && query.length),
-    placeholderData: keepPreviousData,
+    placeholderData: (previousData) => {
+      if (tracksErrorMessage) return []
+      return previousData
+    },
+    refetchOnReconnect: 'always',
+    networkMode: 'always',
   })
 
-  const { data: recentTracks, refetch: refetchRecentTracks } = useQuery({
+  const {
+    data: recents,
+    refetch: refetchRecents,
+    isError: recentsIsError,
+  } = useQuery({
     queryKey: ['history'],
     queryFn: ({ signal }) => getStoredSongs(tokens!.accessToken, signal),
     enabled: Boolean(tokens?.accessToken && !query.length),
   })
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- Reason: "sticky until cleared" behavior
-    setTracksLoaded((prev) =>
-      !query.length ? false : !tracksFetching ? true : prev,
-    )
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Reason: "sticky state"; keep the previous value until there is a reason to change it
+    setTracksLoaded((prev) => {
+      if (!query.length) return false
+      if (!tracksFetching) return true
+      return prev
+    })
   }, [query, tracksFetching])
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Reason: "sticky state"; keep the previous value until there is a reason to change it
+    setTracksErrorMessage((prev) => {
+      if (tracksIsError)
+        return navigator.onLine ? 'No results' : 'No internet connection'
+      if (!tracksFetching && tracks?.length) return undefined
+      return prev
+    })
+  }, [tracks?.length, tracksFetching, tracksIsError])
 
   const removeFromRecent = useMutation({
     mutationFn: (trackId: string) =>
@@ -81,7 +102,7 @@ export function Search() {
       if (context?.previousHistory)
         queryClient.setQueryData(['history'], context.previousHistory)
     },
-    onSuccess: () => void refetchRecentTracks(),
+    onSuccess: () => void refetchRecents(),
   })
 
   const openMenu = (type: 'search' | 'avatar') => {
@@ -139,9 +160,11 @@ export function Search() {
             onFocus={() => openMenu('search')}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === 'ArrowDown') {
+              if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
                 event.preventDefault()
-                tracksRef.current[0]?.focus()
+                tracksRef.current
+                  .at(event.key === 'ArrowDown' ? 0 : -1)
+                  ?.focus()
               }
             }}
             className="flex-1 not-focus-visible:cursor-pointer bg-transparent font-medium text-lg text-white placeholder:text-white/50 focus:outline-none"
@@ -230,9 +253,9 @@ export function Search() {
               {tracksLoaded ? (
                 <ListOfTracks
                   tracks={tracks}
-                  onPick={closeMenu}
-                  noData="No results"
                   tracksRef={tracksRef}
+                  onPick={closeMenu}
+                  errorMessage={tracksErrorMessage}
                 />
               ) : (
                 <>
@@ -241,11 +264,15 @@ export function Search() {
                   </h2>
                   <div className="mx-2 mb-2 h-[0.5px] bg-white/10" />
                   <ListOfTracks
-                    tracks={recentTracks}
+                    tracks={recents}
+                    tracksRef={tracksRef}
                     onPick={closeMenu}
                     onRemove={removeFromRecent.mutate}
-                    noData="No recent tracks"
-                    tracksRef={tracksRef}
+                    errorMessage={
+                      recentsIsError || !recents?.length
+                        ? 'No recent tracks'
+                        : undefined
+                    }
                   />
                 </>
               )}
@@ -267,25 +294,26 @@ export function Search() {
 
 function ListOfTracks({
   tracks,
+  tracksRef,
   onPick,
   onRemove,
-  noData,
-  tracksRef,
+  errorMessage,
 }: {
   tracks: Track[] | undefined
+  tracksRef: React.RefObject<(HTMLButtonElement | null)[]>
   onPick: () => void
   onRemove?: (trackId: string) => void
-  noData?: string
-  tracksRef: React.RefObject<(HTMLButtonElement | null)[]>
+
+  errorMessage: string | undefined
 }) {
-  if (!tracks?.length)
-    return <p className="my-2 text-center text-white">{noData}</p>
+  if (errorMessage)
+    return <p className="my-2 text-center text-white">{errorMessage}</p>
 
   const handleTrackKeyDown = (element: React.KeyboardEvent, index: number) => {
     if (element.key === 'ArrowDown' || element.key === 'ArrowUp') {
       element.preventDefault()
-      const step = element.key === 'ArrowDown' ? 1 : -1
-      const next = (index + step) % tracksRef.current.length
+      const direction = element.key === 'ArrowDown' ? 1 : -1
+      const next = (index + direction) % tracksRef.current.length
       tracksRef.current.at(next)?.focus()
     }
   }
@@ -300,6 +328,7 @@ function ListOfTracks({
             onRemove={onRemove ? () => onRemove(track.id) : undefined}
             ref={(element) => {
               tracksRef.current[i] = element
+              return () => void tracksRef.current.splice(i, 1)
             }}
             onKeyDown={(event) => handleTrackKeyDown(event, i)}
           />
