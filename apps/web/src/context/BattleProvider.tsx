@@ -12,7 +12,7 @@ import {
 } from '~/context/brackets'
 import type { Track } from '~/context/types'
 
-export const BattleProvider = ({ children }: React.PropsWithChildren) => {
+export function BattleProvider({ children }: React.PropsWithChildren) {
   const [tree, setTree] = useState(createBrackets())
   const [activeBracketId, setActiveBracketId] = useState<string | null>(null)
   const searchRef = useRef<HTMLInputElement>(null)

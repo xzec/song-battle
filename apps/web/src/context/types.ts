@@ -1,5 +1,3 @@
-import type { Dispatch } from 'react'
-
 export type Track = {
   id: string
   name: string
@@ -21,7 +19,7 @@ export type BattleContextValue = {
   addTrackToBracket: (bracketId: string, track: Track) => void
   addTrackToFirstAvailableBracket: (track: Track) => void
   activeBracketId: string | null
-  setActiveBracketId: Dispatch<React.SetStateAction<string | null>>
+  setActiveBracketId: React.Dispatch<React.SetStateAction<string | null>>
   searchRef: React.RefObject<HTMLInputElement | null>
   bracketRect: Map<string, DOMRect>
   registerBracketRect: (bracketId: string, rect: DOMRect) => void

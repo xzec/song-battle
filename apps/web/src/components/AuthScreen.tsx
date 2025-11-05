@@ -1,4 +1,3 @@
-import type { SVGProps } from 'react'
 import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 
 export const AuthScreen = () => {
@@ -44,7 +43,7 @@ export const AuthScreen = () => {
 const SpotifyIcon = ({
   className = 'h-6 w-6',
   ...props
-}: SVGProps<SVGSVGElement>) => (
+}: React.SVGProps<SVGSVGElement>) => (
   <svg
     className={className}
     viewBox="0 0 24 24"

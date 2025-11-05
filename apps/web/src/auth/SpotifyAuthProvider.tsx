@@ -24,7 +24,7 @@ const refreshAccessTokenWithRetry = asyncRetry(refreshAccessToken, 2)
 const callbackPathname = new URL(import.meta.env.VITE_SPOTIFY_REDIRECT_URI)
   .pathname
 
-export const SpotifyAuthProvider = ({ children }: React.PropsWithChildren) => {
+export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
   const [status, setStatus] = useState<AuthStatus>('authenticating')
   const [tokens, setTokens] = useState<StoredSpotifyTokens | null>(null)
   const [user, setUser] = useState<SpotifyUserProfile | null>(null)

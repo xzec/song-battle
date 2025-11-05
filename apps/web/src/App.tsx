@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react'
 import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 import { AuthScreen } from '~/components/AuthScreen'
 import { Battle } from '~/components/Battle'
@@ -9,7 +8,7 @@ import { BattleProvider } from '~/context/BattleProvider'
 const App = () => {
   const { status } = useSpotifyAuth()
 
-  let content: ReactNode
+  let content: React.ReactNode
 
   if (status === 'authenticating') {
     content = <LoadingScreen />

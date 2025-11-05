@@ -1,4 +1,4 @@
-import { type RefCallback, useCallback, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { NoImage, Thumbnail } from '~/components/Thumbnail'
 import { useBattle } from '~/context/BattleContext'
 import type { BracketNode, Track } from '~/context/types'
@@ -30,7 +30,7 @@ export function Bracket({
   const battleEnabled = Boolean(bracket.left?.track && bracket.right?.track)
   const isActive = bracket.id === activeBracketId
 
-  const ref = useCallback<RefCallback<HTMLDivElement>>(
+  const ref = useCallback<React.RefCallback<HTMLDivElement>>(
     (element) => {
       if (!element) return
       registerBracketRect(bracket.id, element.getBoundingClientRect())
