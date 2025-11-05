@@ -34,12 +34,7 @@ app.post('/store', async (c) => {
   const key = `user:${email}`
   const track = await c.req.text()
 
-  await redis
-    .multi()
-    .lRem(key, 0, track)
-    .lPush(key, track)
-    .lTrim(key, 0, 4)
-    .exec()
+  await redis.multi().lRem(key, 0, track).lPush(key, track).lTrim(key, 0, 4).exec()
 
   return c.json({ message: 'success' }, 201)
 })

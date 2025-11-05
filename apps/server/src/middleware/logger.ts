@@ -14,10 +14,7 @@ const consoleTransport = new transports.Console({
 
 export const logger = createLogger({
   level: process.env.LOG_LEVEL ?? 'info',
-  format: format.combine(
-    format.errors({ stack: true }),
-    format.splat(),
-  ),
+  format: format.combine(format.errors({ stack: true }), format.splat()),
   transports: [consoleTransport],
 })
 

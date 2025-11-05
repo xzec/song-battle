@@ -52,45 +52,43 @@ const fetchSpotifyProfile = async (token: string) => {
   return (await response.json()) as SpotifyUserProfile
 }
 
-export const authMiddleware = createMiddleware<{ Variables: AuthVariables }>(
-  async (c, next) => {
-    const authorizationHeader = c.req.header('Authorization')
+export const authMiddleware = createMiddleware<{ Variables: AuthVariables }>(async (c, next) => {
+  const authorizationHeader = c.req.header('Authorization')
 
-    if (!authorizationHeader?.startsWith('Bearer ')) {
-      logger.warn('No Bearer token in headers')
-      return c.json({ error: 'Unauthorized' }, 401)
-    }
+  if (!authorizationHeader?.startsWith('Bearer ')) {
+    logger.warn('No Bearer token in headers')
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
 
-    const accessToken = authorizationHeader.slice('Bearer '.length).trim()
+  const accessToken = authorizationHeader.slice('Bearer '.length).trim()
 
-    if (!accessToken) {
-      logger.warn('No Bearer token in headers')
-      return c.json({ error: 'Unauthorized' }, 401)
-    }
+  if (!accessToken) {
+    logger.warn('No Bearer token in headers')
+    return c.json({ error: 'Unauthorized' }, 401)
+  }
 
-    try {
-      const profile = await fetchSpotifyProfile(accessToken)
-      c.set('spotifyProfile', profile)
-      c.set('spotifyAccessToken', accessToken)
-      await next()
-    } catch (error) {
-      if (error instanceof SpotifyAuthError) {
-        if (error.status === 401 || error.status === 403) {
-          logger.warn('Spotify token rejected during auth', {
-            status: error.status,
-          })
-          return c.json({ error: 'Unauthorized' }, 401)
-        }
-
-        logger.error('Spotify auth middleware failed', {
+  try {
+    const profile = await fetchSpotifyProfile(accessToken)
+    c.set('spotifyProfile', profile)
+    c.set('spotifyAccessToken', accessToken)
+    await next()
+  } catch (error) {
+    if (error instanceof SpotifyAuthError) {
+      if (error.status === 401 || error.status === 403) {
+        logger.warn('Spotify token rejected during auth', {
           status: error.status,
-          message: error.message,
         })
-        return c.json({ error: 'Spotify service unavailable' }, 502)
+        return c.json({ error: 'Unauthorized' }, 401)
       }
 
-      logger.error('Unexpected error during auth middleware', { error })
+      logger.error('Spotify auth middleware failed', {
+        status: error.status,
+        message: error.message,
+      })
       return c.json({ error: 'Spotify service unavailable' }, 502)
     }
-  },
-)
+
+    logger.error('Unexpected error during auth middleware', { error })
+    return c.json({ error: 'Spotify service unavailable' }, 502)
+  }
+})
