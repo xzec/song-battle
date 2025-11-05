@@ -23,7 +23,7 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
 
   const storeSongMutation = useMutation({
     mutationFn: async (track: Track) => {
-      if (tokens?.accessToken) await storeSong(track, tokens?.accessToken)
+      if (tokens?.accessToken) return storeSong(track, tokens.accessToken)
     },
     onMutate: async function optimisticUpdate(track: Track) {
       await queryClient.cancelQueries({ queryKey: ['history'] })

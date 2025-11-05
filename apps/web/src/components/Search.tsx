@@ -66,9 +66,8 @@ export function Search() {
   }, [query, tracksFetching])
 
   const removeFromRecent = useMutation({
-    mutationFn: async (trackId: string) => {
-      await deleteStoredSong(trackId, tokens!.accessToken)
-    },
+    mutationFn: (trackId: string) =>
+      deleteStoredSong(trackId, tokens!.accessToken),
     onMutate: async function optimisticUpdate(trackId: string) {
       await queryClient.cancelQueries({ queryKey: ['history'] })
       const previousHistory = queryClient.getQueryData(['history'])
