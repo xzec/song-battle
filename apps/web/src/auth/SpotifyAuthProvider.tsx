@@ -18,7 +18,7 @@ import type {
   StoredSpotifyTokens,
 } from '~/auth/types'
 import { useBackgroundTokenRefresh } from '~/auth/useBackgroundTokenRefresh'
-import { asyncRetry } from '~/utils/asyncRetry'
+import { asyncRetry } from '~/utils/async-retry'
 
 const refreshAccessTokenWithRetry = asyncRetry(refreshAccessToken, 2)
 const callbackPathname = new URL(import.meta.env.VITE_SPOTIFY_REDIRECT_URI)
