@@ -4,10 +4,13 @@ import { createRoot } from 'react-dom/client'
 import App from '~/App'
 import { SpotifyAuthProvider } from '~/auth/SpotifyAuthProvider'
 
+const ONE_DAY = 1000 * 60 * 60 * 24
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: false,
+      staleTime: ONE_DAY,
     },
   },
 })
