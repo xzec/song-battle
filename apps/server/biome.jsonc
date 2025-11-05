@@ -1,0 +1,4 @@
+{
+  "$schema": "https://biomejs.dev/schemas/schema.json",
+  "extends": "//"
+}
