@@ -2,12 +2,7 @@ import type { Track } from '~/context/types'
 
 const searchUrl = 'https://api.spotify.com/v1/search'
 
-export async function searchTracks(
-  query: string,
-  accessToken: string,
-  country: string,
-  signal?: AbortSignal,
-) {
+export async function searchTracks(query: string, accessToken: string, country: string, signal?: AbortSignal) {
   if (!query || signal?.aborted) return []
 
   const params = {

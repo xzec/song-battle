@@ -1,12 +1,6 @@
 import type { BracketNode, Edge } from '~/context/types'
 
-export const LAYERS = [
-  'winner',
-  'final',
-  'semi',
-  'quarter',
-  'contestant',
-] as const
+export const LAYERS = ['winner', 'final', 'semi', 'quarter', 'contestant'] as const
 export const TREE_DEPTH = 4
 type Layer = (typeof LAYERS)[number]
 
@@ -19,11 +13,7 @@ export function createBrackets() {
     contestant: 0,
   }
 
-  const createNode = (
-    id: string,
-    index?: number,
-    parent?: BracketNode,
-  ): BracketNode => ({
+  const createNode = (id: string, index?: number, parent?: BracketNode): BracketNode => ({
     id: typeof index === 'number' ? `${id}-${index}` : id,
     track: null,
     left: null,
@@ -48,11 +38,7 @@ export function createBrackets() {
   return root
 }
 
-export function getBracketsOnDepth(
-  node: BracketNode | null,
-  depth: number,
-  result: BracketNode[] = [],
-) {
+export function getBracketsOnDepth(node: BracketNode | null, depth: number, result: BracketNode[] = []) {
   if (!node) return result
   if (depth === 0) {
     result.push(node)
@@ -65,10 +51,7 @@ export function getBracketsOnDepth(
   return result
 }
 
-export function getBracketById(
-  node: BracketNode | null,
-  id: string,
-): BracketNode | undefined {
+export function getBracketById(node: BracketNode | null, id: string): BracketNode | undefined {
   if (!node) return
   if (node.id === id) return node
 
@@ -91,11 +74,7 @@ export function updateBracketById(
   }
 }
 
-export function createEdges(
-  node: BracketNode,
-  bracketRect: Map<string, DOMRect>,
-  result: Edge[] = [],
-) {
+export function createEdges(node: BracketNode, bracketRect: Map<string, DOMRect>, result: Edge[] = []) {
   function getEdge(nextRect: DOMRect, prevRect: DOMRect) {
     const x1 = prevRect.right
     let y1 = (prevRect.top + prevRect.bottom) / 2

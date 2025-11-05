@@ -11,20 +11,9 @@ type BracketProps = React.HTMLAttributes<HTMLDivElement> & {
   bracket: BracketNode
 }
 
-export function Bracket({
-  interactive = false,
-  bracket,
-  className,
-  ...props
-}: BracketProps) {
+export function Bracket({ interactive = false, bracket, className, ...props }: BracketProps) {
   const [isDragOver, setIsDragOver] = useState(false)
-  const {
-    addTrackToBracket,
-    searchRef,
-    registerBracketRect,
-    activeBracketId,
-    setActiveBracketId,
-  } = useBattle()
+  const { addTrackToBracket, searchRef, registerBracketRect, activeBracketId, setActiveBracketId } = useBattle()
 
   const acceptsTrack = !bracket.track && interactive
   const battleEnabled = Boolean(bracket.left?.track && bracket.right?.track)
@@ -46,8 +35,7 @@ export function Bracket({
         {
           'cursor-pointer border-dashed bg-zinc-700/30': acceptsTrack,
           'border-blue-500 border-solid bg-blue-500/10': isActive,
-          'border-green-500 border-solid bg-green-500/20':
-            isDragOver && interactive,
+          'border-green-500 border-solid bg-green-500/20': isDragOver && interactive,
           'border-none bg-zinc-950 shadow-sm': bracket.track,
           className,
         },
@@ -76,9 +64,7 @@ export function Bracket({
       onDrop={(event) => {
         setIsDragOver(false)
         if (!interactive) return
-        const track = JSON.parse(
-          event.dataTransfer.getData('application/json'),
-        ) as Track
+        const track = JSON.parse(event.dataTransfer.getData('application/json')) as Track
         addTrackToBracket(bracket.id, track)
       }}
       {...props}
@@ -91,10 +77,8 @@ export function Bracket({
     if (bracket.track) return <Track track={bracket.track} />
 
     if (interactive) {
-      if (isDragOver)
-        return <Info className="text-green-500">Release to add</Info>
-      if (isActive)
-        return <Info className="text-blue-500">Choose from search</Info>
+      if (isDragOver) return <Info className="text-green-500">Release to add</Info>
+      if (isActive) return <Info className="text-blue-500">Choose from search</Info>
       return (
         <Info>
           Add track

@@ -1,13 +1,6 @@
 import * as Popover from '@radix-ui/react-popover'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import {
-  startTransition,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  ViewTransition,
-} from 'react'
+import { startTransition, useEffect, useId, useRef, useState, ViewTransition } from 'react'
 import { useHotkeys } from 'react-hotkeys-hook'
 import { deleteStoredSong, getStoredSongs } from '~/api/backend'
 import { searchTracks } from '~/api/spotify'
@@ -46,8 +39,7 @@ export function Search() {
     isError: tracksIsError,
   } = useQuery({
     queryKey: ['search', query],
-    queryFn: ({ signal }) =>
-      searchTracksDebounced(query, tokens!.accessToken, user.country, signal),
+    queryFn: ({ signal }) => searchTracksDebounced(query, tokens!.accessToken, user.country, signal),
     enabled: Boolean(tokens?.accessToken && query.length),
     placeholderData: (previousData) => {
       if (tracksErrorMessage) return []
@@ -79,28 +71,23 @@ export function Search() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Reason: "sticky state"; keep the previous value until there is a reason to change it
     setTracksErrorMessage((prev) => {
-      if (tracksIsError)
-        return navigator.onLine ? 'No results' : 'No internet connection'
+      if (tracksIsError) return navigator.onLine ? 'No results' : 'No internet connection'
       if (!tracksFetching && tracks?.length) return undefined
       return prev
     })
   }, [tracks?.length, tracksFetching, tracksIsError])
 
   const removeFromRecent = useMutation({
-    mutationFn: (trackId: string) =>
-      deleteStoredSong(trackId, tokens!.accessToken),
+    mutationFn: (trackId: string) => deleteStoredSong(trackId, tokens!.accessToken),
     onMutate: async function optimisticUpdate(trackId: string) {
       await queryClient.cancelQueries({ queryKey: ['history'] })
       const previousHistory = queryClient.getQueryData(['history'])
-      queryClient.setQueryData(['history'], (old: Track[]) =>
-        old.filter((track) => track.id !== trackId),
-      )
+      queryClient.setQueryData(['history'], (old: Track[]) => old.filter((track) => track.id !== trackId))
       return { previousHistory }
     },
     onError: (error, _newHistory, context) => {
       console.error(error)
-      if (context?.previousHistory)
-        queryClient.setQueryData(['history'], context.previousHistory)
+      if (context?.previousHistory) queryClient.setQueryData(['history'], context.previousHistory)
     },
     onSuccess: () => void refetchRecents(),
   })
@@ -114,8 +101,7 @@ export function Search() {
   }
 
   const closeMenu = () => {
-    if (document.activeElement instanceof HTMLElement)
-      document.activeElement.blur()
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur()
     setShadowOpen(false)
     setOpen(false)
     setActiveBracketId(null)
@@ -141,12 +127,7 @@ export function Search() {
           }}
         >
           <label htmlFor={searchId}>
-            <Icon
-              icon={MagnifyingGlass}
-              title="Search Spotify"
-              size={32}
-              className="text-white/50"
-            />
+            <Icon icon={MagnifyingGlass} title="Search Spotify" size={32} className="text-white/50" />
           </label>
           <input
             id={searchId}
@@ -162,9 +143,7 @@ export function Search() {
             onKeyDown={(event) => {
               if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
                 event.preventDefault()
-                tracksRef.current
-                  .at(event.key === 'ArrowDown' ? 0 : -1)
-                  ?.focus()
+                tracksRef.current.at(event.key === 'ArrowDown' ? 0 : -1)?.focus()
               }
             }}
             className="flex-1 not-focus-visible:cursor-pointer bg-transparent font-medium text-lg text-white placeholder:text-white/50 focus:outline-none"
@@ -242,8 +221,7 @@ export function Search() {
           className={cn(
             'scrollbar-none pointer-events-auto relative z-100 animate-slide-fade rounded-4xl border border-white/10 bg-zinc-950 p-3 text-white shadow-lg',
             {
-              'max-h-80 w-[calc(100vw-16px)] max-w-xl overflow-y-auto':
-                activeMenu === 'search',
+              'max-h-80 w-[calc(100vw-16px)] max-w-xl overflow-y-auto': activeMenu === 'search',
               'w-44': activeMenu === 'avatar',
             },
           )}
@@ -259,20 +237,14 @@ export function Search() {
                 />
               ) : (
                 <>
-                  <h2 className="my-1 ml-2 block text-sm text-white/40">
-                    Recent
-                  </h2>
+                  <h2 className="my-1 ml-2 block text-sm text-white/40">Recent</h2>
                   <div className="mx-2 mb-2 h-[0.5px] bg-white/10" />
                   <ListOfTracks
                     tracks={recents}
                     tracksRef={tracksRef}
                     onPick={closeMenu}
                     onRemove={removeFromRecent.mutate}
-                    errorMessage={
-                      recentsIsError || !recents?.length
-                        ? 'No recent tracks'
-                        : undefined
-                    }
+                    errorMessage={recentsIsError || !recents?.length ? 'No recent tracks' : undefined}
                   />
                 </>
               )}
@@ -306,8 +278,7 @@ function ListOfTracks({
 
   errorMessage: string | undefined
 }) {
-  if (errorMessage)
-    return <p className="my-2 text-center text-white">{errorMessage}</p>
+  if (errorMessage) return <p className="my-2 text-center text-white">{errorMessage}</p>
 
   const handleTrackKeyDown = (element: React.KeyboardEvent, index: number) => {
     if (element.key === 'ArrowDown' || element.key === 'ArrowUp') {

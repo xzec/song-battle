@@ -3,10 +3,7 @@ import type { AuthErrorType } from '~/auth/types'
 export class AuthError extends Error {
   readonly type: AuthErrorType
 
-  constructor(
-    type: AuthErrorType,
-    { message, cause }: { message?: string } & ErrorOptions = {},
-  ) {
+  constructor(type: AuthErrorType, { message, cause }: { message?: string } & ErrorOptions = {}) {
     super(message ?? AuthError.defaultMessage[type], { cause })
     this.name = 'AuthError'
     this.type = type

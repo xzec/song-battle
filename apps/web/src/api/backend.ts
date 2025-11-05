@@ -1,9 +1,6 @@
 import type { Track } from '~/context/types'
 
-export async function storeSong(
-  track: Track,
-  accessToken: string,
-): Promise<{ message: 'string' }> {
+export async function storeSong(track: Track, accessToken: string): Promise<{ message: 'string' }> {
   const res = await fetch(`${import.meta.env.VITE_API_URL}/store`, {
     method: 'POST',
     body: JSON.stringify(track),
@@ -15,10 +12,7 @@ export async function storeSong(
   return res.json()
 }
 
-export async function getStoredSongs(
-  accessToken: string,
-  signal?: AbortSignal,
-) {
+export async function getStoredSongs(accessToken: string, signal?: AbortSignal) {
   const res = await fetch(`${import.meta.env.VITE_API_URL}/store`, {
     method: 'GET',
     headers: {
@@ -30,10 +24,7 @@ export async function getStoredSongs(
   return parsed.items
 }
 
-export async function deleteStoredSong(
-  trackId: string,
-  accessToken: string,
-): Promise<{ message: 'string' }> {
+export async function deleteStoredSong(trackId: string, accessToken: string): Promise<{ message: 'string' }> {
   const res = await fetch(`${import.meta.env.VITE_API_URL}/store`, {
     method: 'PATCH',
     body: JSON.stringify({ id: trackId }),

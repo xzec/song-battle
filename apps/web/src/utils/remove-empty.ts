@@ -16,10 +16,7 @@ export function removeEmpty<T extends Record<string, unknown>>(obj: T) {
 
 type NonEmpty<T> = T extends Record<string, unknown>
   ? {
-      [K in keyof T as undefined extends T[K] ? K : never]?: Exclude<
-        T[K],
-        undefined
-      >
+      [K in keyof T as undefined extends T[K] ? K : never]?: Exclude<T[K], undefined>
     } & {
       [K in keyof T as undefined extends T[K] ? never : K]: T[K]
     }

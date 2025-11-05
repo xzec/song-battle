@@ -28,11 +28,7 @@ export type SpotifyUserProfile = {
   images: SpotifyImage[]
 }
 
-export type AuthErrorType =
-  | 'callback_error'
-  | 'token_exchange_failed'
-  | 'refresh_failed'
-  | 'network_error'
+export type AuthErrorType = 'callback_error' | 'token_exchange_failed' | 'refresh_failed' | 'network_error'
 
 export type PkceSession = {
   codeVerifier: string
@@ -41,8 +37,4 @@ export type PkceSession = {
   createdAt: number
 }
 
-export type AuthStatus =
-  | 'unauthenticated'
-  | 'authenticating'
-  | 'authenticated'
-  | 'error'
+export type AuthStatus = 'unauthenticated' | 'authenticating' | 'authenticated' | 'error'

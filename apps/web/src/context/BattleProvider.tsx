@@ -3,13 +3,7 @@ import { useRef, useState } from 'react'
 import { storeSong } from '~/api/backend'
 import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 import { BattleContext } from '~/context/BattleContext'
-import {
-  createBrackets,
-  createEdges,
-  getBracketsOnDepth,
-  TREE_DEPTH,
-  updateBracketById,
-} from '~/context/brackets'
+import { createBrackets, createEdges, getBracketsOnDepth, TREE_DEPTH, updateBracketById } from '~/context/brackets'
 import type { Track } from '~/context/types'
 
 export function BattleProvider({ children }: React.PropsWithChildren) {
@@ -42,8 +36,7 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
     },
     onError: (error, _newHistory, context) => {
       console.error(error)
-      if (context?.previousHistory)
-        queryClient.setQueryData(['history'], context.previousHistory)
+      if (context?.previousHistory) queryClient.setQueryData(['history'], context.previousHistory)
     },
   })
 

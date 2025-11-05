@@ -1,10 +1,5 @@
 import { AuthError } from '~/auth/AuthError'
-import type {
-  PkceSession,
-  SpotifyTokenResponse,
-  SpotifyUserProfile,
-  StoredSpotifyTokens,
-} from '~/auth/types'
+import type { PkceSession, SpotifyTokenResponse, SpotifyUserProfile, StoredSpotifyTokens } from '~/auth/types'
 
 const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID
 const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI
@@ -17,8 +12,7 @@ const tokenStorageKey = 'spotify:auth:tokens'
 export const tokenExpiryBuffer = 60_000
 
 function generateRandomString(length: number) {
-  const possible =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
   const values = crypto.getRandomValues(new Uint8Array(length))
   return values.reduce((acc, x) => acc + possible[x % possible.length], '')
 }
@@ -87,9 +81,7 @@ export function tokensAreExpired(tokens: StoredSpotifyTokens) {
   return tokens.expiresAt <= Date.now() + tokenExpiryBuffer
 }
 
-export function convertToStoredTokens(
-  input: SpotifyTokenResponse,
-): StoredSpotifyTokens {
+export function convertToStoredTokens(input: SpotifyTokenResponse): StoredSpotifyTokens {
   const expiresAt = Date.now() + input.expires_in * 1000
   return {
     accessToken: input.access_token,
@@ -129,10 +121,7 @@ export async function beginSpotifyAuth() {
   location.href = url.toString()
 }
 
-export async function exchangeCodeForTokens(
-  code: string,
-  codeVerifier: string,
-) {
+export async function exchangeCodeForTokens(code: string, codeVerifier: string) {
   try {
     const response = await fetch(tokenUrl, {
       method: 'POST',

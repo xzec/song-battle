@@ -12,17 +12,12 @@ import {
   storeTokens,
   tokensAreExpired,
 } from '~/auth/spotify'
-import type {
-  AuthStatus,
-  SpotifyUserProfile,
-  StoredSpotifyTokens,
-} from '~/auth/types'
+import type { AuthStatus, SpotifyUserProfile, StoredSpotifyTokens } from '~/auth/types'
 import { useBackgroundTokenRefresh } from '~/auth/useBackgroundTokenRefresh'
 import { asyncRetry } from '~/utils/async-retry'
 
 const refreshAccessTokenWithRetry = asyncRetry(refreshAccessToken, 2)
-const callbackPathname = new URL(import.meta.env.VITE_SPOTIFY_REDIRECT_URI)
-  .pathname
+const callbackPathname = new URL(import.meta.env.VITE_SPOTIFY_REDIRECT_URI).pathname
 
 export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
   const [status, setStatus] = useState<AuthStatus>('authenticating')

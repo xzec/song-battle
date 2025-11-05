@@ -12,13 +12,7 @@ type SearchItemsProps = React.ComponentProps<'button'> & {
   onRemove?: () => void
 }
 
-export function SearchItem({
-  track,
-  onPick,
-  onRemove,
-  className,
-  ...props
-}: SearchItemsProps) {
+export function SearchItem({ track, onPick, onRemove, className, ...props }: SearchItemsProps) {
   const { addTrackToFirstAvailableBracket } = useBattle()
   const imgRef = useRef<HTMLImageElement>(null)
 
@@ -50,13 +44,7 @@ export function SearchItem({
       )}
       {...props}
     >
-      <Thumbnail
-        ref={imgRef}
-        src={track.imagePreview}
-        alt={track.name}
-        size={40}
-        className="rounded-md"
-      >
+      <Thumbnail ref={imgRef} src={track.imagePreview} alt={track.name} size={40} className="rounded-md">
         <NoImage className="size-10" />
       </Thumbnail>
       <div className="flex grow flex-col justify-center">

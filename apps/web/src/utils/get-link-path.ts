@@ -9,10 +9,7 @@ export function getLinkPath(x1: number, y1: number, x2: number, y2: number) {
   const maxRadius = 8
   const xDistance = Math.abs(x2 - x1)
   const yDistance = Math.abs(y2 - y1)
-  const radius = Math.min(
-    maxRadius,
-    Math.floor(Math.min(xDistance, yDistance) / 2),
-  ) // clamp
+  const radius = Math.min(maxRadius, Math.floor(Math.min(xDistance, yDistance) / 2)) // clamp
 
   // flow: start at x1,y1; draw a horizontal line; make a Bézier curve; draw a vertical line; make a Bézier curve; draw line to x2,y2
   return `

@@ -1,15 +1,6 @@
-export function Waveform({
-  children,
-  ...props
-}: React.SVGProps<SVGSVGElement>) {
+export function Waveform({ children, ...props }: React.SVGProps<SVGSVGElement>) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="24px"
-      height="24px"
-      viewBox="0 0 256 256"
-      {...props}
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 256 256" {...props}>
       {children}
       <path
         fill="currentColor"
