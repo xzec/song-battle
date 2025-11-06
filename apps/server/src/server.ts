@@ -21,10 +21,7 @@ app.use('/store', etag())
 app.get('/', (c) => {
   const profile = c.get('spotifyProfile')
 
-  return c.json({
-    message: 'Authenticated',
-    profile,
-  })
+  return c.json({ message: 'Authenticated', profile })
 })
 
 app.post('/store', async (c) => {
@@ -54,14 +51,7 @@ app.get('/store', async (c) => {
 
   const items = raw.map((item) => JSON.parse(item) as Track)
 
-  return c.json(
-    {
-      message: 'success',
-      items,
-    },
-    200,
-    headers,
-  )
+  return c.json({ message: 'success', items }, 200, headers)
 })
 
 app.patch('/store', async (c) => {
