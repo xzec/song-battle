@@ -1,4 +1,5 @@
 import { createMiddleware } from 'hono/factory'
+import { HTTPException } from 'hono/http-exception'
 import { logger } from '~/middleware/logger'
 
 const SPOTIFY_PROFILE_ENDPOINT = 'https://api.spotify.com/v1/me'
@@ -9,7 +10,7 @@ type SpotifyUserProfile = {
   email?: string
 }
 
-export type AuthVariables = {
+export type AuthContext = {
   spotifyProfile: SpotifyUserProfile
   spotifyAccessToken: string
 }
@@ -33,7 +34,7 @@ const fetchSpotifyProfile = async (token: string) => {
       },
     })
   } catch (error) {
-    logger.error('Failed to contact Spotify API', { error })
+    logger.error('Failed to contact Spotify API', error)
     throw new SpotifyAuthError('Spotify API request failed', 503)
   }
 
@@ -52,19 +53,19 @@ const fetchSpotifyProfile = async (token: string) => {
   return (await response.json()) as SpotifyUserProfile
 }
 
-export const authMiddleware = createMiddleware<{ Variables: AuthVariables }>(async (c, next) => {
+export const authMiddleware = createMiddleware<{ Variables: AuthContext }>(async (c, next) => {
   const authorizationHeader = c.req.header('Authorization')
 
   if (!authorizationHeader?.startsWith('Bearer ')) {
     logger.warn('No Bearer token in headers')
-    return c.json({ error: 'Unauthorized' }, 401)
+    throw new HTTPException(401, { message: 'Unauthorized' })
   }
 
   const accessToken = authorizationHeader.slice('Bearer '.length).trim()
 
   if (!accessToken) {
     logger.warn('No Bearer token in headers')
-    return c.json({ error: 'Unauthorized' }, 401)
+    throw new HTTPException(401, { message: 'Unauthorized' })
   }
 
   try {
@@ -75,20 +76,15 @@ export const authMiddleware = createMiddleware<{ Variables: AuthVariables }>(asy
   } catch (error) {
     if (error instanceof SpotifyAuthError) {
       if (error.status === 401 || error.status === 403) {
-        logger.warn('Spotify token rejected during auth', {
-          status: error.status,
-        })
-        return c.json({ error: 'Unauthorized' }, 401)
+        logger.warn('Spotify token rejected during auth', { status: error.status })
+        throw new HTTPException(401, { message: 'Unauthorized' })
       }
 
-      logger.error('Spotify auth middleware failed', {
-        status: error.status,
-        message: error.message,
-      })
-      return c.json({ error: 'Spotify service unavailable' }, 502)
+      logger.error('Spotify auth middleware failed', error)
+      throw new HTTPException(502, { message: 'Spotify service unavailable' })
     }
 
-    logger.error('Unexpected error during auth middleware', { error })
-    return c.json({ error: 'Spotify service unavailable' }, 502)
+    logger.error('Unexpected error during auth middleware', error)
+    throw new HTTPException(502, { message: 'Spotify service unavailable' })
   }
 })
