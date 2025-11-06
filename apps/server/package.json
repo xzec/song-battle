@@ -5,7 +5,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsdown src/server.ts",
     "start": "node dist/index.js",
-    "biome:check:staged": "biome check . --staged"
+    "biome:check:staged": "biome check . --staged --no-errors-on-unmatched"
   },
   "dependencies": {
     "@hono/node-server": "1.19.5",
