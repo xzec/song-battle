@@ -1,7 +1,7 @@
-import { createHash } from 'node:crypto'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
+import { etag } from 'hono/etag'
 import { HTTPException } from 'hono/http-exception'
 import { type AuthVariables, authMiddleware } from '~/middleware/auth'
 import { loggerMiddleware } from '~/middleware/logger'
@@ -16,6 +16,7 @@ app.get('/favicon.ico', (c) => c.body(null, 204))
 app.use('*', cors())
 app.use('*', loggerMiddleware)
 app.use('*', authMiddleware)
+app.use('/store', etag())
 
 app.get('/', (c) => {
   const profile = c.get('spotifyProfile')
@@ -46,17 +47,9 @@ app.get('/store', async (c) => {
 
   const raw = await redis.lRange(`user:${email}`, 0, -1)
 
-  const hash = createHash('sha256').update(raw.join('\n')).digest('hex')
-  const etag = `"${hash}"`
-
   const headers = {
-    ETag: etag,
     'Cache-Control': 'private, no-cache',
     Vary: 'Authorization',
-  }
-
-  if (c.req.header('If-None-Match') === etag) {
-    return c.newResponse(null, 304, headers)
   }
 
   const items = raw.map((item) => JSON.parse(item) as Track)
