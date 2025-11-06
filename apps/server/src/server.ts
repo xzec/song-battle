@@ -96,25 +96,27 @@ app.onError((error, c) => {
   return c.text('Internal Server Error', 500)
 })
 
-async function shutdown() {
-  logger.info('Initiated shutdown sequence')
-  try {
-    redis.destroy()
-  } catch {
-    logger.error('Failed to destroy Redis client')
-  }
-  process.exit(1)
-}
-
-process.on('SIGINT', shutdown)
-process.on('SIGTERM', shutdown)
-process.on('uncaughtException', shutdown)
-process.on('unhandledRejection', shutdown)
-
-serve(
+const server = serve(
   {
     fetch: app.fetch,
     port: 3044,
   },
   (info) => console.log(`Server is running on http://localhost:${info.port}`),
 )
+
+process.on('SIGINT', () => shutdown('SIGINT', 0))
+process.on('SIGTERM', () => shutdown('SIGTERM', 0))
+process.on('uncaughtException', () => shutdown('uncaughtException', 1))
+process.on('unhandledRejection', () => shutdown('unhandledRejection', 1))
+
+async function shutdown(reason: string, exitCode: number) {
+  logger.info(`Initiated shutdown sequence, reason: "${reason}"`)
+  server.close(() => {
+    try {
+      redis.destroy()
+    } catch {
+      logger.error('Failed to destroy Redis client')
+    }
+    process.exit(exitCode)
+  })
+}
