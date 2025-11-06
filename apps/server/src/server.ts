@@ -33,11 +33,8 @@ app.get('/', (c) => {
 })
 
 app.post('/store', async (c) => {
-  const profile = c.get('spotifyProfile')
-  const email = profile.email
-  if (!email) throw new HTTPException(400, { message: 'No email found' })
-
-  const key = `user:${email}`
+  const user = c.get('userEmailOrId')
+  const key = `user:${user}`
   const track = await c.req.text()
 
   const redis = c.get('redis')
@@ -47,14 +44,12 @@ app.post('/store', async (c) => {
 })
 
 app.get('/store', async (c) => {
-  await new Promise((resolve) => setTimeout(resolve, 5_500))
-  const profile = c.get('spotifyProfile')
-  const email = profile.email
-
-  if (!email) throw new HTTPException(400, { message: 'No email found' })
+  const user = c.get('userEmailOrId')
+  const key = `user:${user}`
+  console.log('A', key)
 
   const redis = c.get('redis')
-  const raw = await redis.lRange(`user:${email}`, 0, -1)
+  const raw = await redis.lRange(key, 0, -1)
 
   const headers = {
     'Cache-Control': 'private, no-cache',
@@ -67,15 +62,12 @@ app.get('/store', async (c) => {
 })
 
 app.patch('/store', async (c) => {
-  const profile = c.get('spotifyProfile')
-  const email = profile.email
-  if (!email) throw new HTTPException(400, { message: 'No email found' })
-
   const req = await c.req.json<{ id: string }>()
   const id = req.id
   if (!id) throw new HTTPException(400, { message: 'No id received' })
 
-  const key = `user:${email}`
+  const user = c.get('userEmailOrId')
+  const key = `user:${user}`
 
   const redis = c.get('redis')
   const raw = await redis.lRange(key, 0, -1)

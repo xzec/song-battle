@@ -13,6 +13,7 @@ type SpotifyUserProfile = {
 export type AuthContext = {
   spotifyProfile: SpotifyUserProfile
   spotifyAccessToken: string
+  userEmailOrId: string
 }
 
 class SpotifyAuthError extends Error {
@@ -72,6 +73,7 @@ export const authMiddleware = createMiddleware<{ Variables: AuthContext }>(async
     const profile = await fetchSpotifyProfile(accessToken)
     c.set('spotifyProfile', profile)
     c.set('spotifyAccessToken', accessToken)
+    c.set('userEmailOrId', profile.email ?? profile.id)
     await next()
   } catch (error) {
     if (error instanceof SpotifyAuthError) {
