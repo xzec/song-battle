@@ -28,8 +28,6 @@ export type SpotifyUserProfile = {
   images: SpotifyImage[]
 }
 
-export type AuthErrorType = 'callback_error' | 'token_exchange_failed' | 'refresh_failed' | 'network_error'
-
 export type PkceSession = {
   codeVerifier: string
   state: string

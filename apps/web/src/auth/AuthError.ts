@@ -1,4 +1,4 @@
-import type { AuthErrorType } from '~/auth/types'
+type AuthErrorType = 'callback_error' | 'token_exchange_failed' | 'refresh_failed' | 'network_error'
 
 export class AuthError extends Error {
   readonly type: AuthErrorType
