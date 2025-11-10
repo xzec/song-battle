@@ -21,7 +21,7 @@ const callbackPathname = new URL(import.meta.env.VITE_SPOTIFY_REDIRECT_URI).path
 
 export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
   const [status, setStatus] = useState<AuthStatus>('authenticating')
-  const [tokens, setTokens] = useState<StoredSpotifyTokens | null>(null)
+  const [tokens, setTokens] = useState<StoredSpotifyTokens | null>(null) // TODO init tokens here
   const [user, setUser] = useState<SpotifyUserProfile | null>(null)
   const [error, setError] = useState<AuthError | null>(null)
   const mountedRef = useRef(false)
@@ -33,6 +33,15 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
     setError(error)
     setUser(null)
     clearStoredTokens()
+    setTokens(null)
+  }, [])
+
+  const handleLoadError = useCallback((error: AuthError) => {
+    console.error(error)
+    setStatus('error')
+    setError(error)
+    setUser(null)
+    // clearStoredTokens()
     setTokens(null)
   }, [])
 
@@ -60,6 +69,20 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
       setStatus('authenticated')
     },
     [handleError],
+  )
+
+  const loadUserProfile = useCallback(
+    async (accessToken: string) => {
+      try {
+        const profile = await fetchSpotifyProfile(accessToken)
+        setUser(profile)
+        setError(null)
+      } catch (profileError) {
+        handleLoadError(AuthError.from(profileError))
+        return
+      }
+    },
+    [handleLoadError],
   )
 
   const refreshTokens = useCallback(async () => {
@@ -121,13 +144,15 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
         if (tokensAreExpired(stored)) {
           await refreshTokens()
         } else {
-          await applyTokens(stored)
+          setTokens(stored)
+          await loadUserProfile(stored.accessToken)
+          setStatus('authenticated')
         }
       }
 
       void initialize()
     },
-    [handleError, handleUnauthenticated, applyTokens, refreshTokens],
+    [handleError, handleUnauthenticated, applyTokens, refreshTokens, loadUserProfile],
   )
 
   useBackgroundTokenRefresh(tokens, refreshTokens)
