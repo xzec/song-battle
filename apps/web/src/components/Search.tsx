@@ -54,7 +54,7 @@ export function Search() {
     refetch: refetchRecents,
     isError: recentsIsError,
   } = useQuery({
-    queryKey: ['history'],
+    queryKey: ['recents'],
     queryFn: ({ signal }) => getStoredSongs(tokens!.accessToken, signal),
     enabled: Boolean(tokens?.accessToken && !query.length),
   })
@@ -80,14 +80,14 @@ export function Search() {
   const removeFromRecent = useMutation({
     mutationFn: (trackId: string) => deleteStoredSong(trackId, tokens!.accessToken),
     onMutate: async function optimisticUpdate(trackId: string) {
-      await queryClient.cancelQueries({ queryKey: ['history'] })
-      const previousHistory = queryClient.getQueryData(['history'])
-      queryClient.setQueryData(['history'], (old: Track[]) => old.filter((track) => track.id !== trackId))
-      return { previousHistory }
+      await queryClient.cancelQueries({ queryKey: ['recents'] })
+      const prevRecents = queryClient.getQueryData(['recents'])
+      queryClient.setQueryData(['recents'], (old: Track[]) => old.filter((track) => track.id !== trackId))
+      return { prevRecents }
     },
-    onError: (error, _newHistory, context) => {
+    onError: (error, _variables, context) => {
       console.error(error)
-      if (context?.previousHistory) queryClient.setQueryData(['history'], context.previousHistory)
+      if (context?.prevRecents) queryClient.setQueryData(['recents'], context.prevRecents)
     },
     onSuccess: () => void refetchRecents(),
   })

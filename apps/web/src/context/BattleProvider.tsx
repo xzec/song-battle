@@ -20,9 +20,9 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
       if (tokens?.accessToken) return storeSong(track, tokens.accessToken)
     },
     onMutate: async function optimisticUpdate(track: Track) {
-      await queryClient.cancelQueries({ queryKey: ['history'] })
-      const previousHistory = queryClient.getQueryData(['history'])
-      queryClient.setQueryData(['history'], (old: Track[]) => {
+      await queryClient.cancelQueries({ queryKey: ['recents'] })
+      const prevRecents = queryClient.getQueryData(['recents'])
+      queryClient.setQueryData(['recents'], (old: Track[]) => {
         const existingTrack = old.find((t) => t.id === track.id)
         if (existingTrack !== undefined) {
           old.splice(old.indexOf(existingTrack), 1)
@@ -32,11 +32,11 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
         if (old.length === 5) old.pop()
         return [track, ...old]
       })
-      return { previousHistory }
+      return { prevRecents }
     },
-    onError: (error, _newHistory, context) => {
+    onError: (error, _variables, context) => {
       console.error(error)
-      if (context?.previousHistory) queryClient.setQueryData(['history'], context.previousHistory)
+      if (context?.prevRecents) queryClient.setQueryData(['recents'], context.prevRecents)
     },
   })
 
