@@ -49,11 +49,7 @@ export function Search() {
     networkMode: 'always',
   })
 
-  const {
-    data: recents,
-    refetch: refetchRecents,
-    isError: recentsIsError,
-  } = useQuery({
+  const { data: recents, isError: recentsIsError } = useQuery({
     queryKey: ['recents'],
     queryFn: ({ signal }) => getStoredSongs(tokens!.accessToken, signal),
     enabled: Boolean(tokens?.accessToken && !query.length),
@@ -89,7 +85,8 @@ export function Search() {
       console.error(error)
       if (context?.prevRecents) queryClient.setQueryData(['recents'], context.prevRecents)
     },
-    onSuccess: () => void refetchRecents(),
+    onSettled: (_data, _error, _variables, _onMutateResult, context) =>
+      context.client.invalidateQueries({ queryKey: ['recents'] }),
   })
 
   const openMenu = (type: 'search' | 'avatar') => {

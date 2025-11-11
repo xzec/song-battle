@@ -23,14 +23,9 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
       await queryClient.cancelQueries({ queryKey: ['recents'] })
       const prevRecents = queryClient.getQueryData(['recents'])
       queryClient.setQueryData(['recents'], (old: Track[]) => {
-        const existingTrack = old.find((t) => t.id === track.id)
-        if (existingTrack !== undefined) {
-          old.splice(old.indexOf(existingTrack), 1)
-          old.unshift(existingTrack)
-          return old
-        }
-        if (old.length === 5) old.pop()
-        return [track, ...old]
+        const index = old.findIndex((t) => t.id === track.id)
+        if (index !== -1) return [track, ...old.toSpliced(index, 1)]
+        return [track, ...old].slice(0, 5)
       })
       return { prevRecents }
     },
@@ -38,6 +33,8 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
       console.error(error)
       if (context?.prevRecents) queryClient.setQueryData(['recents'], context.prevRecents)
     },
+    onSettled: (_data, _error, _variables, _onMutateResult, context) =>
+      context.client.invalidateQueries({ queryKey: ['recents'] }),
   })
 
   const addTrackToBracket = (bracketId: string, track: Track) => {
