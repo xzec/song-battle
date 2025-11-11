@@ -147,8 +147,9 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
         } else {
           dispatch({ type: 'reuse-tokens', tokens: stored })
           await loadUserProfile(stored.accessToken)
-          dispatch({ type: 'set-authenticated' })
         }
+
+        dispatch({ type: 'set-authenticated' })
       }
 
       void initialize()
