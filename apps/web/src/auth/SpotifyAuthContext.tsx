@@ -21,6 +21,6 @@ export const useSpotifyAuth = () => {
 
 export const useUser = () => {
   const context = useSpotifyAuth()
-  if (!context.user) console.error('useUser must be used within authenticated screens.')
-  return context.user!
+  if (!context.user) throw new Error('useUser must be used within authenticated screens.')
+  return context.user
 }
