@@ -46,7 +46,6 @@ app.post('/store', async (c) => {
 app.get('/store', async (c) => {
   const user = c.get('userEmailOrId')
   const key = `user:${user}`
-  console.log('A', key)
 
   const redis = c.get('redis')
   const raw = await redis.lRange(key, 0, -1)
