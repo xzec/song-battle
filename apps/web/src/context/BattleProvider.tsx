@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
+import { useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import { storeSong } from '~/api/backend'
 import { useSpotifyAuth } from '~/auth/SpotifyAuthContext'
 import { BattleContext } from '~/context/BattleContext'
 import { createBrackets, createEdges, getBracketsOnDepth, TREE_DEPTH, updateBracketById } from '~/context/brackets'
-import type { Track } from '~/context/types'
+import type { Edge, Track } from '~/context/types'
 
 export function BattleProvider({ children }: React.PropsWithChildren) {
   const [tree, setTree] = useState(createBrackets())
@@ -12,8 +12,12 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
   const searchRef = useRef<HTMLInputElement>(null)
   const { tokens } = useSpotifyAuth()
   const queryClient = useQueryClient()
-  const [bracketRect, setBracketRect] = useState(new Map<string, DOMRect>())
-  const edges = createEdges(tree, bracketRect)
+  const [edges, setEdges] = useState<Record<string, Edge> | null>(null)
+  const bracketsRef = useRef<Record<string, HTMLDivElement>>({})
+
+  const initiateEdges = useEffectEvent(() => setEdges(createEdges(tree, bracketsRef.current)))
+
+  useLayoutEffect(() => initiateEdges(), [])
 
   const storeSongMutation = useMutation({
     mutationFn: async (track: Track) => {
@@ -50,25 +54,15 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
     }
 
     const brackets = getBracketsOnDepth(tree, TREE_DEPTH)
-    if (!brackets.some((bracket) => bracket.track === null)) {
-      console.error('No available brackets')
-      return
-    }
 
     for (const bracket of brackets) {
       if (bracket.track === null) {
         addTrackToBracket(bracket.id, track)
-        break
+        return
       }
     }
-  }
 
-  const registerBracketRect = (bracketId: string, rect: DOMRect) => {
-    setBracketRect((prev) => {
-      const map = new Map(prev)
-      map.set(bracketId, rect)
-      return map
-    })
+    console.error('No available brackets')
   }
 
   const value = {
@@ -78,8 +72,7 @@ export function BattleProvider({ children }: React.PropsWithChildren) {
     activeBracketId,
     setActiveBracketId,
     searchRef,
-    bracketRect,
-    registerBracketRect,
+    bracketsRef,
     edges,
   }
 

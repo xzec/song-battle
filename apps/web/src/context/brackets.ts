@@ -74,29 +74,25 @@ export function updateBracketById(
   }
 }
 
-export function createEdges(node: BracketNode, bracketRect: Map<string, DOMRect>, result: Edge[] = []) {
-  function getEdge(nextRect: DOMRect, prevRect: DOMRect) {
-    const x1 = prevRect.right
-    let y1 = (prevRect.top + prevRect.bottom) / 2
-    const x2 = nextRect.left
-    const y2 = (nextRect.top + nextRect.bottom) / 2
-    if (Math.abs(y1 - y2) <= 1) y1 = y2 // handle bad-looking 1 px offsets
-    return [x1, y1, x2, y2] as Edge
+export function createEdges(root: BracketNode, bracketElements: Record<string, HTMLDivElement>) {
+  const edges: Record<string, Edge> = {}
+
+  function traverse(node: BracketNode) {
+    if (node.parent) {
+      const nodeRect = bracketElements[node.id]?.getBoundingClientRect()
+      const parentRect = bracketElements[node.parent.id]?.getBoundingClientRect()
+      if (!nodeRect || !parentRect) return
+
+      const x = Math.min(Math.abs(nodeRect.left - parentRect.right), Math.abs(nodeRect.right - parentRect.left))
+      const y = parentRect.y - nodeRect.y
+      edges[node.id] = { x, y }
+    }
+
+    if (node.left) traverse(node.left)
+    if (node.right) traverse(node.right)
   }
 
-  function traverse(next: BracketNode) {
-    if (!next.left || !next.right) return result
-    const nextRect = bracketRect.get(next.id)
-    const leftRect = bracketRect.get(next.left.id)
-    const rightRect = bracketRect.get(next.right.id)
-    if (!nextRect || !leftRect || !rightRect) return result
+  traverse(root)
 
-    result.push(getEdge(nextRect, leftRect), getEdge(nextRect, rightRect))
-    traverse(next.left)
-    traverse(next.right)
-
-    return result
-  }
-
-  return traverse(node)
+  return edges
 }

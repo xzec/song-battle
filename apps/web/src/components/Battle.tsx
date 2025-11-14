@@ -3,11 +3,10 @@ import * as Column from '~/components/Column'
 import { Search } from '~/components/Search'
 import { useBattle } from '~/context/BattleContext'
 import { getBracketsOnDepth } from '~/context/brackets'
-import { getLinkPath } from '~/utils/get-link-path'
 import { toArrayPairs } from '~/utils/to-array-pairs'
 
 export const Battle = () => {
-  const { tree, edges } = useBattle()
+  const { tree } = useBattle()
 
   const contestants = getBracketsOnDepth(tree, 4)
   const quarters = getBracketsOnDepth(tree, 3)
@@ -69,11 +68,6 @@ export const Battle = () => {
             <Bracket bracket={tree} />
           </Column.Content>
         </Column.Root>
-        <svg className="pointer-events-none absolute top-0 left-0 size-full fill-none stroke-1 stroke-violet-300">
-          {edges.map((edge, i) => (
-            <path key={i} d={getLinkPath(...edge)} />
-          ))}
-        </svg>
       </main>
     </>
   )

@@ -21,9 +21,8 @@ export type BattleContextValue = {
   activeBracketId: string | null
   setActiveBracketId: React.Dispatch<React.SetStateAction<string | null>>
   searchRef: React.RefObject<HTMLInputElement | null>
-  bracketRect: Map<string, DOMRect>
-  registerBracketRect: (bracketId: string, rect: DOMRect) => void
-  edges: Edge[]
+  bracketsRef: React.RefObject<Record<string, HTMLDivElement>>
+  edges: Record<string, Edge> | null
 }
 
-export type Edge = [x1: number, y1: number, x2: number, y2: number]
+export type Edge = { x: number; y: number }
