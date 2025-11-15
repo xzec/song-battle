@@ -36,8 +36,7 @@ const initialState = {
 type ACTION_TYPE =
   | { type: 'error'; error: AuthError }
   | { type: 'unauthenticate' }
-  | { type: 'store-tokens'; tokens: StoredSpotifyTokens }
-  | { type: 'reuse-tokens'; tokens: StoredSpotifyTokens }
+  | { type: 'set-tokens'; tokens: StoredSpotifyTokens }
   | { type: 'set-user'; user: SpotifyUserProfile }
   | { type: 'start-auth' }
   | { type: 'set-authenticated' }
@@ -45,15 +44,10 @@ type ACTION_TYPE =
 function reducer(state: State, action: ACTION_TYPE): State {
   switch (action.type) {
     case 'error':
-      clearStoredTokens()
       return { status: 'error', tokens: null, user: null, error: action.error }
     case 'unauthenticate':
-      clearStoredTokens()
       return { status: 'unauthenticated', tokens: null, user: null, error: null }
-    case 'store-tokens':
-      storeTokens(action.tokens)
-      return { ...state, tokens: action.tokens }
-    case 'reuse-tokens':
+    case 'set-tokens':
       return { ...state, tokens: action.tokens }
     case 'set-user':
       return { ...state, user: action.user }
@@ -71,15 +65,23 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
   const mountedRef = useRef(false)
   const refreshTokenInProgress = useRef(false)
 
-  const loadUserProfile = useCallback(async (accessToken: string) => {
-    try {
-      const profile = await fetchSpotifyProfile(accessToken)
-      dispatch({ type: 'set-user', user: profile })
-    } catch (profileError) {
-      dispatch({ type: 'error', error: AuthError.from(profileError) })
-      return
-    }
+  const handleError = useCallback((error: AuthError) => {
+    clearStoredTokens()
+    dispatch({ type: 'error', error })
   }, [])
+
+  const loadUserProfile = useCallback(
+    async (accessToken: string) => {
+      try {
+        const profile = await fetchSpotifyProfile(accessToken)
+        dispatch({ type: 'set-user', user: profile })
+      } catch (profileError) {
+        handleError(AuthError.from(profileError))
+        return
+      }
+    },
+    [handleError],
+  )
 
   const refreshTokens = useCallback(async () => {
     if (refreshTokenInProgress.current) return
@@ -87,7 +89,7 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
 
     const refreshToken = getStoredTokens()?.refreshToken
     if (!refreshToken) {
-      dispatch({ type: 'unauthenticate' })
+      logout()
       return
     }
 
@@ -102,16 +104,16 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
       const error = AuthError.from(refreshError)
       // ignore network errors when offline, `useBackgroundTokenRefresh` will attempt to refresh when back online
       if (error.type === 'network_error' && !navigator.onLine) return
-
-      dispatch({ type: 'error', error })
+      handleError(error)
       return
     } finally {
       refreshTokenInProgress.current = false
     }
 
-    dispatch({ type: 'store-tokens', tokens: nextTokens })
+    storeTokens(nextTokens)
+    dispatch({ type: 'set-tokens', tokens: nextTokens })
     await loadUserProfile(nextTokens.accessToken)
-  }, [loadUserProfile])
+  }, [handleError, loadUserProfile])
 
   useEffect(
     function authenticate() {
@@ -125,11 +127,12 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
           const searchParams = new URLSearchParams(location.search)
           try {
             const { tokens } = await handleSpotifyCallback(searchParams)
-            dispatch({ type: 'store-tokens', tokens })
+            storeTokens(tokens)
+            dispatch({ type: 'set-tokens', tokens })
             await loadUserProfile(tokens.accessToken)
             dispatch({ type: 'set-authenticated' })
           } catch (authError) {
-            dispatch({ type: 'error', error: AuthError.from(authError) })
+            handleError(AuthError.from(authError))
           } finally {
             history.replaceState(null, '', '/')
           }
@@ -139,13 +142,13 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
         // 2) load stored tokens
         const stored = getStoredTokens()
         if (!stored) {
-          dispatch({ type: 'unauthenticate' })
+          logout()
           return
         }
         if (tokensAreExpired(stored)) {
           await refreshTokens()
         } else {
-          dispatch({ type: 'reuse-tokens', tokens: stored })
+          dispatch({ type: 'set-tokens', tokens: stored })
           await loadUserProfile(stored.accessToken)
         }
 
@@ -154,20 +157,20 @@ export function SpotifyAuthProvider({ children }: React.PropsWithChildren) {
 
       void initialize()
     },
-    [refreshTokens, loadUserProfile],
+    [refreshTokens, loadUserProfile, handleError],
   )
 
   useBackgroundTokenRefresh(state.tokens, refreshTokens)
 
   const login = () => {
     dispatch({ type: 'start-auth' })
-
-    void beginSpotifyAuth().catch((authError) => {
-      dispatch({ type: 'error', error: AuthError.from(authError) })
-    })
+    void beginSpotifyAuth().catch((authError) => handleError(AuthError.from(authError)))
   }
 
-  const logout = () => dispatch({ type: 'unauthenticate' })
+  const logout = () => {
+    clearStoredTokens()
+    dispatch({ type: 'unauthenticate' })
+  }
 
   const value = {
     ...state,
